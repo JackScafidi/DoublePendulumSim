@@ -1,0 +1,23 @@
+# Simulink build artifacts
+slprj/
+*.slxc
+*.autosave
+
+# Generated models -- rebuild with simulink/build_model.m
+simulink/dpc_plant.slx
+simulink/dpc_closedloop.slx
+
+# Generated codegen helpers -- rebuilt by build_model.m
+simulink/dpc_sl_eom_terms.m
+simulink/dpc_sl_plant_fcn.m
+
+# Study output
+results/*.mat
+results/*.txt
+
+# MATLAB
+*.asv
+*.m~
+
+# Local archive of the previous build -- not tracked
+_reference/
