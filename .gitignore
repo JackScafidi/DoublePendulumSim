@@ -21,3 +21,10 @@ results/*.txt
 
 # Local archive of the previous build -- not tracked
 _reference/
+
+# Virtualenv
+.venv/
+
+# Python
+__pycache__/
+*.egg-info/
