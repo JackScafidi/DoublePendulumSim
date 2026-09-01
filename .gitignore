@@ -28,3 +28,6 @@ _reference/
 # Python
 __pycache__/
 *.egg-info/
+
+# Cached symbolic derivation
+dpc/.derivation_cache/
