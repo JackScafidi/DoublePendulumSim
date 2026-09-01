@@ -46,9 +46,17 @@ stage 2 could not fit the model to hardware.
 
 - `x` — cart position, positive to the right.
 - `theta_1`, `theta_2` — link angles measured from **straight up**, positive
-  counter-clockwise, both **absolute** (measured from vertical, not from the
-  preceding link).
+  tipping the link toward `+x`, both **absolute** (measured from vertical, not
+  from the preceding link). A link at angle `theta` points along
+  `(sin(theta), cos(theta))`.
 - Gravity acts in `-y`.
+
+Positive-toward-`+x` is clockwise on standard axes, not counter-clockwise. It
+is chosen deliberately: the cart force is positive toward `+x`, and correcting
+a pendulum that has fallen toward `+theta` requires driving the cart toward
+`+x`. Input and error therefore share a sign, which keeps the control gains
+positive and the arithmetic aligned with intuition. It is also the convention
+used throughout the cart-pole literature.
 
 Upright is therefore the origin. This is chosen because the control target is
 the inverted equilibrium: linearisation happens at zero, the LQR state is
