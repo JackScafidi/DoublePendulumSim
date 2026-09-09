@@ -256,9 +256,13 @@ def _derive_cached(cfg: ModelConfig) -> Model:
 class NumericModel:
     """Fast numeric evaluation of a derived Model.
 
-    Deliberately plain -- fixed-size arrays, explicit indexing, one linear
-    solve -- because this is the layer that gets transcribed to C for the
-    STM32. Nothing here should depend on Python-specific behaviour.
+    Term evaluation only. What is solved for -- and in which direction -- lives
+    in dynamics.py, because there is more than one answer once the drive is a
+    stepper.
+
+    Deliberately plain -- fixed-size arrays, explicit indexing -- because this
+    is the layer that gets transcribed to C++ for the STM32. Nothing here
+    should depend on Python-specific behaviour.
     """
 
     __slots__ = ("model", "_M", "_Cqd", "_G", "_Ffric", "_E")
@@ -303,20 +307,6 @@ class NumericModel:
     def Ffric(self, vv, p: Params) -> np.ndarray:
         return np.asarray(self._Ffric(tuple(vv), p.vector()),
                           dtype=float).reshape(3)
-
-    def accel(self, s, F: float, p: Params) -> np.ndarray:
-        """Solve M qddot = B F - C qdot - G - Ffric for the accelerations."""
-        qv, vv = s[0:3], s[3:6]
-        rhs = np.array([F, 0.0, 0.0])
-        rhs = rhs - self.Cqd(qv, vv, p) - self.G(qv, p) - self.Ffric(vv, p)
-        return np.linalg.solve(self.M(qv, p), rhs)
-
-    def deriv(self, s, F: float, p: Params) -> np.ndarray:
-        """State derivative, in the fixed ordering: velocities then accelerations."""
-        out = np.empty(6)
-        out[0:3] = s[3:6]
-        out[3:6] = self.accel(s, F, p)
-        return out
 
     def energy(self, s, p: Params) -> float:
         """Total mechanical energy T + V. Conserved exactly when friction is

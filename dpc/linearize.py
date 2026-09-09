@@ -7,6 +7,7 @@ it ever needed to relinearise on the fly.
 
 import numpy as np
 
+from dpc.dynamics import deriv
 from dpc.model import NumericModel
 from dpc.params import Params
 
@@ -27,10 +28,10 @@ def linearize(model: NumericModel, s0: np.ndarray, F0: float, p: Params,
     for j in range(6):
         step = np.zeros(6)
         step[j] = eps
-        A[:, j] = (model.deriv(s0 + step, F0, p)
-                   - model.deriv(s0 - step, F0, p)) / (2.0 * eps)
+        A[:, j] = (deriv(model, s0 + step, F0, p)
+                   - deriv(model, s0 - step, F0, p)) / (2.0 * eps)
 
-    B = ((model.deriv(s0, F0 + eps, p)
-          - model.deriv(s0, F0 - eps, p)) / (2.0 * eps)).reshape(6, 1)
+    B = ((deriv(model, s0, F0 + eps, p)
+          - deriv(model, s0, F0 - eps, p)) / (2.0 * eps)).reshape(6, 1)
 
     return A, B

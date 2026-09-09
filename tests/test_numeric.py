@@ -1,5 +1,6 @@
 import numpy as np
 
+from dpc.dynamics import accel, deriv
 from dpc.model import ModelConfig, build
 from dpc.params import Corrections, Params
 
@@ -14,16 +15,16 @@ def test_mass_matrix_is_symmetric_positive_definite():
 
 
 def test_at_rest_upright_with_no_force_nothing_moves():
-    assert np.allclose(M.accel(np.zeros(6), 0.0, P), 0.0, atol=1e-12)
+    assert np.allclose(accel(M, np.zeros(6), 0.0, P), 0.0, atol=1e-12)
 
 
 def test_a_push_accelerates_the_cart_forward():
-    assert M.accel(np.zeros(6), 1.0, P)[0] > 0
+    assert accel(M, np.zeros(6), 1.0, P)[0] > 0
 
 
 def test_hanging_at_rest_is_an_equilibrium():
     s = np.array([0.0, np.pi, np.pi, 0.0, 0.0, 0.0])
-    assert np.allclose(M.accel(s, 0.0, P), 0.0, atol=1e-9)
+    assert np.allclose(accel(M, s, 0.0, P), 0.0, atol=1e-9)
 
 
 def test_upright_is_unstable_and_hanging_is_stable():
@@ -35,15 +36,15 @@ def test_upright_is_unstable_and_hanging_is_stable():
     """
     up = np.array([0.0, 0.05, 0.05, 0.0, 0.0, 0.0])
     down = np.array([0.0, np.pi + 0.05, np.pi + 0.05, 0.0, 0.0, 0.0])
-    assert M.accel(up, 0.0, P)[1] > 0
-    assert M.accel(down, 0.0, P)[1] < 0
+    assert accel(M, up, 0.0, P)[1] > 0
+    assert accel(M, down, 0.0, P)[1] < 0
 
 
 def test_deriv_stacks_velocity_then_acceleration():
     s = np.array([0.0, 0.2, -0.1, 1.5, 0.3, -0.4])
-    d = M.deriv(s, 0.0, P)
+    d = deriv(M, s, 0.0, P)
     assert np.allclose(d[:3], s[3:])
-    assert np.allclose(d[3:], M.accel(s, 0.0, P))
+    assert np.allclose(d[3:], accel(M, s, 0.0, P))
 
 
 def test_energy_is_higher_upright_than_hanging():
@@ -63,7 +64,7 @@ def test_rotor_adds_inertia_but_no_weight():
     potential energy -- and so the hanging/upright energy gap -- untouched."""
     heavy = Params(corr=Corrections(k_m_rotor=2.0))
     s = np.zeros(6)
-    assert abs(M.accel(s, 1.0, heavy)[0]) < abs(M.accel(s, 1.0, P)[0])
+    assert abs(accel(M, s, 1.0, heavy)[0]) < abs(accel(M, s, 1.0, P)[0])
 
     down = np.array([0.0, np.pi, np.pi, 0.0, 0.0, 0.0])
     gap_ref = M.energy(s, P) - M.energy(down, P)
@@ -73,17 +74,17 @@ def test_rotor_adds_inertia_but_no_weight():
 
 def test_a_tilted_rail_pulls_the_cart_downhill():
     tilted = Params(phi=0.26)          # about 15 degrees
-    assert M.accel(np.zeros(6), 0.0, tilted)[0] < 0
+    assert accel(M, np.zeros(6), 0.0, tilted)[0] < 0
 
 
 def test_viscous_friction_opposes_cart_motion():
     from dpc.params import Friction
     damped = Params(fric=Friction(b_cart=5.0))
     moving = np.array([0.0, 0.0, 0.0, 1.0, 0.0, 0.0])
-    assert M.accel(moving, 0.0, damped)[0] < 0
+    assert accel(M, moving, 0.0, damped)[0] < 0
 
 
 def test_cache_reuse_gives_identical_numbers():
     again = build(ModelConfig())
     s = np.array([0.1, 0.4, -0.3, 0.2, 0.1, -0.5])
-    assert np.allclose(again.accel(s, 0.7, P), M.accel(s, 0.7, P))
+    assert np.allclose(accel(again, s, 0.7, P), accel(M, s, 0.7, P))
