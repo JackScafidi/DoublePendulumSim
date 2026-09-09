@@ -11,6 +11,7 @@ and so a correction that comes back far from one is legible as a warning rather
 than a result.
 """
 
+import math
 from dataclasses import dataclass, field
 
 # Canonical ordering, shared with model.py so lambdified functions can take a
@@ -125,6 +126,80 @@ class Friction:
 
 
 @dataclass(frozen=True)
+class Drive:
+    """The stepper drive train. Provisional until the hardware is finalised.
+
+    None of these appear in the equations of motion, so they are deliberately
+    absent from EFFECTIVE_NAMES: they shape the command the motor accepts, not
+    the physics of the plant.
+    """
+
+    r_pulley: float = 6.4e-3
+    """m. 20T GT2 pitch radius. The same r that makes m_rotor = J/r^2."""
+
+    steps_per_rev: int = 200
+    """NEMA-17 at 1.8 degrees per full step."""
+
+    microsteps: int = 16
+    """TMC2209 microstepping divisor."""
+
+    tau_hold: float = 0.40
+    """N m. Holding torque of a typical 42x40 mm NEMA-17."""
+
+    tau_derate: float = 0.5
+    """Dimensionless. Available torque falls off with step rate; this is the
+    fraction of holding torque treated as usable."""
+
+    a_max: float = 10.0
+    """m/s^2. Acceleration ceiling set by torque through the pulley."""
+
+    v_max: float = 0.5
+    """m/s. Step rate beyond this is unsustainable."""
+
+    jerk_max: float = 200.0
+    """m/s^3. How fast the step generator can ramp its own rate."""
+
+    tau_lag: float = 3e-3
+    """s. First-order stand-in for the step generator's finite bandwidth."""
+
+    slip_enable: bool = False
+    """Step loss is implemented but off by default. It is the only mechanism
+    that makes the step-counted position differ from the truth, so enabling it
+    is a deliberate question, not a default."""
+
+    @property
+    def step_res(self) -> float:
+        """m of belt travel per microstep."""
+        return 2.0 * math.pi * self.r_pulley / (self.steps_per_rev * self.microsteps)
+
+    @property
+    def tau_budget(self) -> float:
+        """N m the motor can actually be relied on to deliver."""
+        return self.tau_hold * self.tau_derate
+
+    @property
+    def F_max(self) -> float:
+        """N at the belt corresponding to the torque budget."""
+        return self.tau_budget / self.r_pulley
+
+
+@dataclass(frozen=True)
+class Control:
+    """Loop timing. Not physical, but numeric, so it lives here like everything
+    else numeric."""
+
+    ts: float = 1e-3
+    """s. Control period. One measurement, one command, one motor update."""
+
+    substeps: int = 10
+    """Plant integration steps per control tick. Exists only so integration
+    error stays well below the effects under study."""
+
+    tau_rate: float = 5e-3
+    """s. Low-pass time constant on differenced angular rates."""
+
+
+@dataclass(frozen=True)
 class Params:
     """The complete parameter set: nominals, their corrections, and the
     quantities that are fitted directly."""
@@ -132,6 +207,8 @@ class Params:
     nominal: Nominal = field(default_factory=Nominal)
     corr: Corrections = field(default_factory=Corrections)
     fric: Friction = field(default_factory=Friction)
+    drive: Drive = field(default_factory=Drive)
+    ctrl: Control = field(default_factory=Control)
 
     phi: float = 0.0
     """rad. Rail tilt from horizontal."""
