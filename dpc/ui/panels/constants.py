@@ -11,13 +11,14 @@ dpc/controllers/ arrive with working widgets and no edit to this file.
 """
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import (QCheckBox, QDoubleSpinBox, QFrame, QHBoxLayout,
-                               QLabel, QScrollArea, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QDoubleSpinBox, QFrame, QHBoxLayout, QLabel,
+                               QScrollArea, QVBoxLayout, QWidget)
 
 from dpc.controllers.registry import Entry
 from dpc.params import Params
 from dpc.scenarios import Scenario
 from dpc.ui import theme as T
+from dpc.ui.widgets import NeumorphicCheck
 
 DRIVE_FIELDS = (
     ("a_max", "a_max", "m/s²", 0.1, 100.0, 0.5),
@@ -167,9 +168,9 @@ class ConstantsPanel(QScrollArea):
             self._drive_spins[name] = spin
             self._drive_box.addWidget(_row(label, spin))
 
-        slip = QCheckBox()
+        slip = NeumorphicCheck()
         slip.setChecked(d.slip_enable)
-        slip.stateChanged.connect(
+        slip.toggled.connect(
             lambda v: self.changed.emit("drive.slip_enable", float(bool(v))))
         self._drive_box.addWidget(_row("slip", slip))
         self._drive_box.addWidget(
