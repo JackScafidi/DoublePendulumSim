@@ -72,6 +72,11 @@ class SimSource:
     def ts(self) -> float:
         return self.params.ctrl.ts
 
+    @property
+    def n_slip(self) -> int:
+        """Control ticks lost to step slip so far in this run."""
+        return self._motor.n_slip
+
     def start(self, controller, scenario: Scenario) -> None:
         self._controller = controller
         self._scenario = scenario
