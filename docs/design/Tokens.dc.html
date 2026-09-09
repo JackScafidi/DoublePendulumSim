@@ -1,0 +1,219 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+  <style>
+    body { margin: 0; font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif; }
+    a { color: #3987e5; } a:hover { color: #6fb4ee; }
+  </style>
+</helmet>
+
+<div style="width: 900px; height: 900px; background: #0D1014; color: #E6EAF0; padding: 28px 30px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px; font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;">
+
+  <div style="display: flex; flex-direction: column; gap: 4px;">
+    <span style="font-size: 16px; font-weight: 600;">Dashboard tokens</span>
+    <span style="font-size: 11.5px; color: #8A94A3; line-height: 1.5;">Signal hues are the validated dark categorical palette, assigned in fixed slot order. Every within-plot pair clears the colour-blind separation floor against this surface; the pair carrying the least separation (aqua &#8596; yellow) also differs by dash pattern, so identity is never colour alone.</span>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 9px;">
+    <span style="font-size: 9.5px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: #5A6472;">Surfaces &amp; ink</span>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;">
+
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="height: 44px; background: #0D1014; border: 1px solid #232A33; border-radius: 4px;"></div>
+        <span style="font-size: 10.5px; color: #8A94A3;">window</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #E6EAF0;">#0D1014</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="height: 44px; background: #12161B; border: 1px solid #232A33; border-radius: 4px;"></div>
+        <span style="font-size: 10.5px; color: #8A94A3;">panel / plot surface</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #E6EAF0;">#12161B</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="height: 44px; background: #171C22; border: 1px solid #232A33; border-radius: 4px;"></div>
+        <span style="font-size: 10.5px; color: #8A94A3;">raised (cart, chips)</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #E6EAF0;">#171C22</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="height: 44px; background: #232A33; border-radius: 4px;"></div>
+        <span style="font-size: 10.5px; color: #8A94A3;">border</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #E6EAF0;">#232A33</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="height: 44px; background: #1E252E; border-radius: 4px;"></div>
+        <span style="font-size: 10.5px; color: #8A94A3;">plot grid</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #E6EAF0;">#1E252E</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="height: 44px; background: #E6EAF0; border-radius: 4px;"></div>
+        <span style="font-size: 10.5px; color: #8A94A3;">text primary</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #E6EAF0;">#E6EAF0</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="height: 44px; background: #8A94A3; border-radius: 4px;"></div>
+        <span style="font-size: 10.5px; color: #8A94A3;">text secondary</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #E6EAF0;">#8A94A3</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="height: 44px; background: #5A6472; border-radius: 4px;"></div>
+        <span style="font-size: 10.5px; color: #8A94A3;">text muted</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #E6EAF0;">#5A6472</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 9px;">
+    <span style="font-size: 9.5px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: #5A6472;">Signals</span>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 22px;">
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <svg width="34" height="10" style="display: block; flex-shrink: 0;"><line x1="0" y1="5" x2="34" y2="5" stroke="#3987e5" stroke-width="2.4"></line></svg>
+        <span style="font-size: 11.5px; flex-grow: 1;">&#952;&#8321; &mdash; link 1 angle</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A94A3;">#3987e5</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <svg width="34" height="10" style="display: block; flex-shrink: 0;"><line x1="0" y1="5" x2="34" y2="5" stroke="#d95926" stroke-width="2.4"></line></svg>
+        <span style="font-size: 11.5px; flex-grow: 1;">&#952;&#8322; &mdash; link 2 angle</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A94A3;">#d95926</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <svg width="34" height="10" style="display: block; flex-shrink: 0;"><line x1="0" y1="5" x2="34" y2="5" stroke="#199e70" stroke-width="2.4"></line></svg>
+        <span style="font-size: 11.5px; flex-grow: 1;">cart x &mdash; true</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A94A3;">#199e70</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <svg width="34" height="10" style="display: block; flex-shrink: 0;"><line x1="0" y1="5" x2="34" y2="5" stroke="#c98500" stroke-width="2.4" stroke-dasharray="5 3"></line></svg>
+        <span style="font-size: 11.5px; flex-grow: 1;">cart x &mdash; step count <span style="color: #5A6472;">(dashed)</span></span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A94A3;">#c98500</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <svg width="34" height="10" style="display: block; flex-shrink: 0;"><line x1="0" y1="5" x2="34" y2="5" stroke="#d55181" stroke-width="2.4"></line></svg>
+        <span style="font-size: 11.5px; flex-grow: 1;">acceleration &mdash; commanded</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A94A3;">#d55181</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <svg width="34" height="10" style="display: block; flex-shrink: 0;"><line x1="0" y1="5" x2="34" y2="5" stroke="#008300" stroke-width="2.4"></line></svg>
+        <span style="font-size: 11.5px; flex-grow: 1;">acceleration &mdash; delivered</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A94A3;">#008300</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <svg width="34" height="10" style="display: block; flex-shrink: 0;"><line x1="0" y1="5" x2="34" y2="5" stroke="#9085e9" stroke-width="2.4"></line></svg>
+        <span style="font-size: 11.5px; flex-grow: 1;">motor torque</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A94A3;">#9085e9</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <svg width="34" height="10" style="display: block; flex-shrink: 0;"><line x1="0" y1="5" x2="34" y2="5" stroke="#d03b3b" stroke-width="2" stroke-dasharray="4 3"></line></svg>
+        <span style="font-size: 11.5px; flex-grow: 1;">limits &mdash; a_max, &#964; budget <span style="color: #5A6472;">(status, not a series)</span></span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A94A3;">#d03b3b</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 22px;">
+
+    <div style="flex: 1; display: flex; flex-direction: column; gap: 9px;">
+      <span style="font-size: 9.5px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: #5A6472;">Type</span>
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <div style="display: flex; align-items: baseline; gap: 10px;">
+          <span style="font-size: 13px; font-weight: 600; width: 190px;">Double pendulum on a cart</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #5A6472;">Sans 13 / 600</span>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 10px;">
+          <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #8A94A3; width: 190px;">Panel title</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #5A6472;">Sans 10 / 600 / .09em</span>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 10px;">
+          <span style="font-size: 9.5px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: #5A6472; width: 190px;">Section heading</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #5A6472;">Sans 9.5 / 600 / .11em</span>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 10px;">
+          <span style="font-size: 11px; color: #8A94A3; width: 190px;">Constant label</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #5A6472;">Sans 11 / 400</span>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 10px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; width: 190px;">0.612 &#183; 174.3 &#183; 1.840</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #5A6472;">Mono 11.5 / 400</span>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 10px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; width: 190px;">&#952;&#8321; 174.3&#176;</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #5A6472;">Mono 15 &mdash; canvas readout</span>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 10px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #5A6472; width: 190px;">axis ticks &#183; units</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #5A6472;">Mono 10 / muted</span>
+        </div>
+      </div>
+      <span style="font-size: 10.5px; color: #5A6472; line-height: 1.5; padding-top: 2px;">Every number is monospaced so digits stay put as values change &mdash; a figure that jitters column-width while running is unreadable. Labels are proportional.</span>
+    </div>
+
+    <div style="width: 300px; display: flex; flex-direction: column; gap: 9px;">
+      <span style="font-size: 9.5px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: #5A6472;">Spacing &amp; shape</span>
+      <div style="display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="height: 8px; width: 4px; background: #3987e5;"></div>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #8A94A3;">4 &mdash; icon gap, chip padding</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="height: 8px; width: 8px; background: #3987e5;"></div>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #8A94A3;">8 &mdash; inside panels</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="height: 8px; width: 12px; background: #3987e5;"></div>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #8A94A3;">12 &mdash; between panels</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="height: 8px; width: 16px; background: #3987e5;"></div>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #8A94A3;">16 &mdash; window padding</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="height: 8px; width: 18px; background: #3987e5;"></div>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #8A94A3;">18 &mdash; constants sections</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px; padding-top: 6px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #8A94A3;">radius 4 panels &#183; 3 controls</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #8A94A3;">border 1px #232A33</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #8A94A3;">constants column 300px</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #8A94A3;">trace 1.6px &#183; limits 0.9px dashed</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #8A94A3;">links 7px round cap</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #8A94A3;">joints r5.5 hollow, 2.5px ring</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 9px;">
+    <span style="font-size: 9.5px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: #5A6472;">Mechanism</span>
+    <div style="display: flex; gap: 22px; align-items: center; background: #12161B; border: 1px solid #232A33; border-radius: 4px; padding: 14px 18px;">
+      <svg viewBox="0 0 300 150" style="width: 300px; height: 150px; flex-shrink: 0;">
+        <line x1="20" y1="120" x2="280" y2="120" stroke="#2A323C" stroke-width="3" stroke-linecap="round"></line>
+        <rect x="122" y="106" width="60" height="28" rx="4" fill="none" stroke="#c98500" stroke-width="1.5" stroke-dasharray="4 3" stroke-opacity="0.65"></rect>
+        <rect x="116" y="106" width="60" height="28" rx="4" fill="#171C22" stroke="#3D4754" stroke-width="1.5"></rect>
+        <polyline points="152,64 160,48 174,38 190,36" fill="none" stroke="#d95926" stroke-width="2" stroke-opacity="0.22" stroke-linecap="round"></polyline>
+        <line x1="146" y1="120" x2="186" y2="52" stroke="#3987e5" stroke-width="7" stroke-linecap="round"></line>
+        <line x1="186" y1="52" x2="204" y2="34" stroke="#d95926" stroke-width="7" stroke-linecap="round"></line>
+        <circle cx="146" cy="120" r="5.5" fill="#0D1014" stroke="#3987e5" stroke-width="2.5"></circle>
+        <circle cx="186" cy="52" r="5.5" fill="#0D1014" stroke="#d95926" stroke-width="2.5"></circle>
+        <circle cx="204" cy="34" r="4" fill="#d95926"></circle>
+      </svg>
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <span style="font-size: 11.5px; color: #8A94A3; line-height: 1.55;">Links carry their own plot colour, so the animation and the angle plot name the same thing the same way. Joints are hollow &mdash; a ring in the link colour over the window ground &mdash; so overlapping links stay readable when they cross.</span>
+        <span style="font-size: 11.5px; color: #8A94A3; line-height: 1.55;">The dashed amber outline behind the cart is where the <em>step counter</em> thinks the cart is. In simulation without slip the two sit on top of each other; when slip is enabled they part, and the divergence becomes visible in the animation rather than only in a plot.</span>
+        <span style="font-size: 11.5px; color: #8A94A3; line-height: 1.55;">A fading trail follows the link-2 tip &mdash; the only decoration on the canvas, and it earns its place by making the phase of a swing legible in a still frame.</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
