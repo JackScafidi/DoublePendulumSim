@@ -38,7 +38,13 @@ never wear a signal's colour, or the same hue would carry two meanings.
 
 One light source, top left. Negative offsets carry the light shadow, positive
 the dark one, on every element including inset ones. Blur is twice the offset.
-Offsets: 5 for cards, 3 for wells, radius 16 on panels and 9 on controls -- the
+Outer shadows are clipped to OUTSIDE the element, as a CSS box-shadow is;
+without that the blurred shape stays near-opaque across its middle and the
+offset leaves a hard-edged sliver reading as a second shape. Controls also dial
+the light half back to 0.5 when filled -- white against the surface is nearly
+invisible, but white against indigo is a bright band.
+
+Offsets: 4 for cards, 3 for wells and controls, radius 16 on panels and 9 on controls -- the
 shadow needs curvature to wrap around.
 
 **Qt has no `box-shadow`.** Stylesheets parse and discard it (verified: the same
@@ -47,6 +53,27 @@ casts exactly one shadow. So `dpc/ui/neumorphic.py` rasterises the pair itself
 and caches them per size. A raised frame reserves `3 * offset + 2` px of margin
 for its own shadow, because Qt clips painting to the widget rectangle and an
 unreserved shadow is cropped into a bevel.
+
+### Constants panel
+
+Laid out after FTC Dashboard's configuration panel, which solves the same
+problem: a long list of live-editable values where what you most need to see is
+which ones you have moved.
+
+- **Modified marker** -- an amber `#9a6700` bullet in its own leading column,
+  drawn transparent when unmodified rather than omitted, so the name column
+  never shifts. FTC uses `#fbbf24`; that sits near 1.7:1 on this surface, so it
+  is stepped darker.
+- **Inline baseline** -- the default value, dimmed and parenthesised, beside
+  anything edited.
+- **Filter** -- collapses the panel to only the modified rows.
+- **Copy** -- FTC's Save writes back to the robot; here `params.py` is the
+  source of truth, so the equivalent hands you a snippet to paste into it.
+- **Reset** -- re-emits every modified value at its baseline, through the
+  ordinary edit path, so a reset reaches the source exactly as a keystroke does.
+
+Read-only rows carry no baseline and can never be marked: plant values and
+scenario initial conditions are facts, not settings.
 
 ### Coloured masses
 
