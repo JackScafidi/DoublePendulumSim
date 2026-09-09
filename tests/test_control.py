@@ -3,7 +3,8 @@ import inspect
 import numpy as np
 import pytest
 
-from dpc.control import ConstantController, ControlOutput, ZeroController
+from dpc.control import ControlOutput
+from dpc.controllers.basic import ConstantController, ZeroController
 from dpc.params import Params
 from dpc.sensors import Measurement
 

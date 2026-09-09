@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from dpc.control import ConstantController, ZeroController
+from dpc.controllers.basic import ConstantController, ZeroController
 from dpc.dynamics import accel, deriv, deriv_accel
 from dpc.model import ModelConfig, build
 from dpc.params import Control, Drive, Friction, Params
