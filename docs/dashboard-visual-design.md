@@ -8,23 +8,26 @@ https://claude.ai/code/artifact/541df8a0-7adb-4750-b29e-958eb761fd83
 
 ## Surfaces and ink
 
-Neumorphic dark. The defining rule is that a raised element is the **same
+Neumorphic light. The defining rule is that a raised element is the **same
 colour** as what it sits on -- depth comes only from the shadow -- so there is
 one surface value, not a ladder of them. The only second surface is the sunken
-well that data lives in, which is darker because traces need the contrast.
+well that data lives in.
+
+The base is deliberately not pure white: a white ground leaves no room for the
+light half of the shadow, and the extrusion collapses into a single drop shadow.
 
 | Role | Hex |
 |---|---|
-| surface (page, cards, chips) | `#2c2f36` |
-| sunken well (plots, inputs, animation) | `#24272d` |
-| shadow light (up-left) | `#3d424d` |
-| shadow dark (down-right) | `#191b20` |
-| plot grid | `#31353d` |
-| border | `#383c45` |
-| border interactive | `#6a7080` |
-| text primary | `#E6EAF0` |
-| text secondary | `#9aa2b1` |
-| text muted | `#6f7686` |
+| surface (page, cards, chips) | `#e6e7ee` |
+| sunken well (plots, inputs, animation) | `#dcdde5` |
+| shadow light (up-left) | `#ffffff` |
+| shadow dark (down-right) | `#c3c4ca` |
+| plot grid | `#cbccd6` |
+| border | `#cfd0d8` |
+| border interactive | `#7a7d92` |
+| text primary | `#2b2d42` |
+| text secondary | `#5c5f72` |
+| text muted | `#7a7d92` |
 | accent (Run, focus, scrub fill) | `#5057e8` |
 | accent pressed | `#3b41c4` |
 
@@ -60,20 +63,36 @@ a plot.
 
 | Signal | Hex | Style |
 |---|---|---|
-| theta1 | `#3987e5` | solid |
-| theta2 | `#d95926` | solid |
-| cart x, true | `#199e70` | solid |
-| cart x, step count | `#c98500` | dashed |
-| acceleration, commanded | `#d55181` | solid |
+| theta1 | `#2a78d6` | solid |
+| theta2 | `#b4531f` | solid |
+| cart x, true | `#12795a` | solid |
+| cart x, step count | `#a35400` | dashed |
+| acceleration, commanded | `#b03a67` | solid |
 | acceleration, delivered | `#008300` | solid |
-| motor torque | `#9085e9` | solid |
-| limits: a_max, tau budget | `#d03b3b` | dashed, 0.9 px |
+| motor torque | `#4a3aa7` | solid |
+| limits: a_max, tau budget | `#a82b3f` | dashed, 0.9 px |
 
-Validated against the sunken well `#24272d` in dark mode: lightness band, chroma floor,
-adjacent-pair colour-blind separation, normal-vision floor and contrast all
-pass. The tightest adjacent pair is aqua/yellow at CVD dE 8.4, which is inside
-the band that requires secondary encoding -- those two are the cart traces, and
-the step count is dashed, so identity never rests on colour alone.
+Re-stepped for the light ground. Clearing 3:1 against a near-white surface
+forces every hue darker than its dark-theme step, and darkening naively
+collapses aqua and amber into neighbouring browns -- so those two were pushed
+apart in hue until the pair separated.
+
+Validated against the sunken well `#dcdde5`. Every per-slot check passes for all
+seven: lightness band, chroma floor and contrast. Separation is checked on the
+pairs that actually co-occur in a plot, which is what the pairlist is for:
+
+| Pair | CVD dE | Normal-vision dE |
+|---|---|---|
+| theta1 / theta2 | 26.3 | 29.3 |
+| cart true / step count | 9.0 | 19.1 |
+| commanded / delivered | 8.6 | 31.9 |
+
+Motor torque is a lone series and needs no pair. The two combinations the
+whole-list check flags -- theta2 against cart-true, and step-count against
+commanded -- are colours that never appear in the same plot.
+
+The cart pair sits in the band that requires secondary encoding, and the step
+count is dashed, so identity never rests on colour alone.
 
 The limit colour is a reserved *status* value, not a ninth series. It never
 labels data, only a threshold, which is why it may repeat across two plots
