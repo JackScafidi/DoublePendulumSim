@@ -48,11 +48,11 @@ def _box_blur(a: np.ndarray, r: int) -> np.ndarray:
 
 def _rounded_mask(w: int, h: int, pad: int, radius: float) -> np.ndarray:
     """Alpha of a rounded rect, as float 0..1, on a padded canvas."""
-    img = QImage(w + 2 * pad, h + 2 * pad, QImage.Format_ARGB32_Premultiplied)
+    img = QImage(w + 2 * pad, h + 2 * pad, QImage.Format.Format_ARGB32_Premultiplied)
     img.fill(0)
     q = QPainter(img)
-    q.setRenderHint(QPainter.Antialiasing)
-    q.setPen(Qt.NoPen)
+    q.setRenderHint(QPainter.RenderHint.Antialiasing)
+    q.setPen(Qt.PenStyle.NoPen)
     q.setBrush(QColor(255, 255, 255))
     q.drawRoundedRect(QRectF(pad, pad, w, h), radius, radius)
     q.end()
@@ -82,7 +82,7 @@ def _over(dst: np.ndarray, src: np.ndarray) -> np.ndarray:
 def _to_pixmap(rgba: np.ndarray) -> QPixmap:
     buf = np.ascontiguousarray(np.clip(rgba, 0, 255).astype(np.uint8))
     h, w = buf.shape[:2]
-    img = QImage(buf.data, w, h, w * 4, QImage.Format_ARGB32_Premultiplied)
+    img = QImage(buf.data, w, h, w * 4, QImage.Format.Format_ARGB32_Premultiplied)
     return QPixmap.fromImage(img.copy())
 
 
@@ -183,7 +183,7 @@ class NeumorphicFrame(QFrame):
         with a little slack. A raised frame reserves this as margin."""
         self._pixmap: QPixmap | None = None
         self._for_size = None
-        self.setAttribute(Qt.WA_StyledBackground, False)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, False)
 
     def _body_size(self) -> tuple[int, int]:
         """A raised frame's shadow falls OUTSIDE its body, and Qt clips painting
@@ -208,7 +208,7 @@ class NeumorphicFrame(QFrame):
 
     def paintEvent(self, event) -> None:
         q = QPainter(self)
-        q.setRenderHint(QPainter.Antialiasing)
+        q.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         w, h = self._body_size()
         origin = 0 if self.inset else self.pad

@@ -83,6 +83,7 @@ class SimSource:
         self._restart()
 
     def _restart(self) -> None:
+        assert self._scenario is not None and self._controller is not None
         self._s = np.array(self._scenario.s0, dtype=float)
         self._motor = MotorState()
         self._i = 0
@@ -111,7 +112,7 @@ class SimSource:
 
     def poll(self, t_playback: float) -> list[Sample]:
         """Every sample from the current head up to t_playback."""
-        if self.done or self._controller is None:
+        if self.done or self._controller is None or self._scenario is None:
             return []
 
         out: list[Sample] = []

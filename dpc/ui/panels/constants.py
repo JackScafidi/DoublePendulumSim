@@ -68,28 +68,34 @@ def _note(text: str) -> QLabel:
     lab.setWordWrap(True)
     lab.setMinimumWidth(NOTE_WIDTH)
     rect = lab.fontMetrics().boundingRect(
-        0, 0, NOTE_WIDTH, 10000, Qt.TextWordWrap, text)
+        0, 0, NOTE_WIDTH, 10000, Qt.TextFlag.TextWordWrap, text)
     lab.setMinimumHeight(rect.height() + 4)
     return lab
 
 
-def _value(text: str, unit: str = "") -> QWidget:
-    """A read-only value plus its unit. The QLabel holding the number is exposed
-    as `.value_label` so a caller updating every frame can setText on it instead
-    of rebuilding the widget."""
-    w = QWidget()
-    h = QHBoxLayout(w)
-    h.setContentsMargins(0, 0, 0, 0)
-    h.setSpacing(4)
-    v = QLabel(text)
-    v.setObjectName("value")
-    h.addWidget(v)
-    if unit:
-        u = QLabel(unit)
-        u.setObjectName("unit")
-        h.addWidget(u)
-    w.value_label = v
-    return w
+class ValueCell(QWidget):
+    """A read-only value beside its unit.
+
+    A real class rather than a QWidget with an attribute bolted on, so the
+    label a caller updates every frame is part of the type.
+    """
+
+    def __init__(self, text: str, unit: str = ""):
+        super().__init__()
+        h = QHBoxLayout(self)
+        h.setContentsMargins(0, 0, 0, 0)
+        h.setSpacing(4)
+        self.value_label = QLabel(text)
+        self.value_label.setObjectName("value")
+        h.addWidget(self.value_label)
+        if unit:
+            u = QLabel(unit)
+            u.setObjectName("unit")
+            h.addWidget(u)
+
+
+def _value(text: str, unit: str = "") -> ValueCell:
+    return ValueCell(text, unit)
 
 
 class Row(QWidget):
@@ -152,8 +158,8 @@ class ConstantsPanel(QScrollArea):
         super().__init__(parent)
         self.setWidgetResizable(True)
         self.setFixedWidth(T.CONSTANTS_WIDTH)
-        self.setFrameShape(QFrame.NoFrame)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setFrameShape(QFrame.Shape.NoFrame)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         self._body = QWidget()
         self._v = QVBoxLayout(self._body)
@@ -241,6 +247,8 @@ class ConstantsPanel(QScrollArea):
     def _clear(self, box: QVBoxLayout, prefix: str | None = None) -> None:
         while box.count():
             item = box.takeAt(0)
+            if item is None:
+                continue
             w = item.widget()
             if w is not None:
                 # setParent(None) BEFORE deleteLater: deletion is deferred to
@@ -261,7 +269,7 @@ class ConstantsPanel(QScrollArea):
         s.setValue(value)
         s.setSuffix(f" {unit}" if unit else "")
         s.setFixedWidth(118)
-        s.setAlignment(Qt.AlignRight)
+        s.setAlignment(Qt.AlignmentFlag.AlignRight)
         s.valueChanged.connect(lambda v, n=name: self._edited(n, float(v)))
         return s
 

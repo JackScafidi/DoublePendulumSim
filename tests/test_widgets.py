@@ -5,7 +5,7 @@ import pytest
 pytest.importorskip("PySide6")
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtCore import QPointF, Qt  # noqa: E402
+from PySide6.QtCore import QEvent, QPointF, Qt  # noqa: E402
 from PySide6.QtGui import QMouseEvent  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
@@ -21,16 +21,16 @@ def qapp():
 
 def _event(kind, x, y):
     return QMouseEvent(kind, QPointF(x, y), QPointF(x, y), QPointF(x, y),
-                       Qt.LeftButton, Qt.LeftButton, Qt.NoModifier,
-                       Qt.MouseEventNotSynthesized)
+                       Qt.MouseButton.LeftButton, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier,
+                       Qt.MouseEventSource.MouseEventNotSynthesized)
 
 
 def _press(w, x=5, y=5):
-    w.mousePressEvent(_event(QMouseEvent.Type.MouseButtonPress, x, y))
+    w.mousePressEvent(_event(QEvent.Type.MouseButtonPress, x, y))
 
 
 def _release(w, x=5, y=5):
-    w.mouseReleaseEvent(_event(QMouseEvent.Type.MouseButtonRelease, x, y))
+    w.mouseReleaseEvent(_event(QEvent.Type.MouseButtonRelease, x, y))
 
 
 def test_a_filled_button_is_a_coloured_mass_with_its_own_inner_shade(qapp):
