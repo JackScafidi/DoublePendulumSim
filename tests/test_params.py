@@ -3,7 +3,7 @@ import math
 import pytest
 
 from dpc.params import (EFFECTIVE_NAMES, Control, Corrections, Drive,
-                        Nominal, Params)
+                        Friction, Nominal, Params)
 
 
 def test_defaults_apply_unit_corrections():
@@ -93,3 +93,25 @@ def test_drive_and_control_are_not_in_the_effective_vector():
     assert len(p.vector()) == len(EFFECTIVE_NAMES) == 19
     assert "r_pulley" not in EFFECTIVE_NAMES
     assert "ts" not in EFFECTIVE_NAMES
+
+
+def test_vector_is_cached_on_the_instance():
+    """Rebuilt on every lambdified call otherwise -- four times per solve, and
+    a solve happens forty times per control tick."""
+    p = Params()
+    assert p.vector() is p.vector()
+
+
+def test_cached_vector_still_matches_effective():
+    for p in (Params(),
+              Params(corr=Corrections(k_m1=2.0)),
+              Params(fric=Friction(b_cart=0.4, c_cart=0.5))):
+        eff = p.effective()
+        assert p.vector() == tuple(eff[name] for name in EFFECTIVE_NAMES)
+
+
+def test_caching_does_not_disturb_equality_or_hashing():
+    a, b = Params(), Params()
+    a.vector()
+    assert a == b
+    assert hash(a) == hash(b)
