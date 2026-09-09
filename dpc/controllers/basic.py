@@ -42,7 +42,7 @@ class ConstantController:
     """
 
     PARAMS = (
-        ParamSpec("a", "acceleration", "m/s^2", 2.0, -10.0, 10.0, step=0.1),
+        ParamSpec("a", "acceleration", "m/s²", 2.0, -10.0, 10.0, step=0.1),
         ParamSpec("hold", "hold for", "s", 1.0, 0.0, 30.0, step=0.1),
     )
 
