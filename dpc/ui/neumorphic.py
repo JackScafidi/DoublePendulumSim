@@ -116,6 +116,28 @@ def inset_pixmap(w: int, h: int, offset: int, radius: float) -> QPixmap:
     return _to_pixmap(out)
 
 
+def inner_shade_pixmap(w: int, h: int, offset: int, radius: float,
+                       shade: QColor) -> QPixmap:
+    """The inner shade that gives a COLOURED mass its internal form.
+
+    A colour fill still extrudes from the same surface under the same light: the
+    outer dual shadow does that. What this adds is one inset layer in a darker
+    step of the fill's OWN hue, gathered along the lower-right interior, so the
+    mass reads as a solid object catching light from the upper left rather than
+    a flat pill with a shadow under it. Without it the fill is, in the design
+    language's words, a flat rectangle wearing a shadow.
+
+    Deliberately NOT a white sheen: a strong inset highlight reads as a
+    different material and composites over the label, wrecking its contrast.
+    """
+    blur = offset * 2
+    pad = blur + offset + 2
+    shape = _rounded_mask(w, h, pad, radius)
+    outside = _box_blur(1.0 - shape, blur)
+    inner = np.roll(outside, (-offset, -offset), axis=(0, 1)) * shape
+    return _to_pixmap(_tint(inner, shade, shade.alphaF()))
+
+
 _BLUR_CACHE: dict[tuple, np.ndarray] = {}
 
 

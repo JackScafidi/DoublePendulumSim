@@ -5,12 +5,12 @@ state. The window owns the clock.
 """
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import (QComboBox, QHBoxLayout, QLabel, QPushButton,
-                               QSlider, QWidget)
+from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QWidget
 
 from dpc.controllers.registry import Entry
 from dpc.scenarios import SCENARIOS
 from dpc.ui import theme as T
+from dpc.ui.widgets import NeumorphicButton, NeumorphicSlider
 
 SCRUB_STEPS = 1000
 """Slider resolution. Time is a float; the slider is an integer, so the scrub
@@ -51,8 +51,9 @@ class SelectorPanel(QWidget):
         for sc in SCENARIOS:
             self.scenario.addItem(sc.label, sc.key)
 
-        self.run = QPushButton("Run")
-        self.run.setObjectName("run")
+        # The one primary fill in the view: a coloured mass that extrudes from
+        # the surface and carries its own inner shade.
+        self.run = NeumorphicButton("Run", filled=True, offset=5)
         self.run.clicked.connect(self.run_pressed)
 
         for label, widget in (("Controller", self.controller),
@@ -99,15 +100,13 @@ class TransportPanel(QWidget):
         h.setContentsMargins(T.PAD_PANEL, 6, T.PAD_PANEL, 6)
         h.setSpacing(T.GAP_PANEL)
 
-        self.play = QPushButton("❚❚")
-        self.play.setObjectName("transport")
+        self.play = NeumorphicButton("❚❚", offset=4, padding=(10, 6))
         self.play.setCheckable(True)
         self.play.setChecked(True)
-        self.play.setFixedWidth(38)
         self.play.toggled.connect(self._on_play)
         h.addWidget(self.play)
 
-        self.slider = QSlider(Qt.Horizontal)
+        self.slider = NeumorphicSlider()
         self.slider.setRange(0, SCRUB_STEPS)
         self.slider.valueChanged.connect(self._on_scrub)
         h.addWidget(self.slider, 1)
@@ -121,8 +120,7 @@ class TransportPanel(QWidget):
 
         self._speed_buttons = []
         for s in self.SPEEDS:
-            b = QPushButton(f"{s:g}×")
-            b.setObjectName("transport")
+            b = NeumorphicButton(f"{s:g}×", offset=4, padding=(9, 5))
             b.setCheckable(True)
             b.setChecked(s == 1.0)
             b.clicked.connect(lambda _, v=s: self._on_speed(v))

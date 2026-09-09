@@ -97,8 +97,8 @@ MONO = MONO_PREF[0]
 """Preferred names, kept for documentation. Use fonts() for anything drawn."""
 
 SIZE_TITLE = 13
-SIZE_PANEL = 10
-SIZE_SECTION = 9
+SIZE_PANEL = 11
+SIZE_SECTION = 11
 SIZE_LABEL = 11
 SIZE_VALUE = 11
 SIZE_READOUT = 15
@@ -120,7 +120,7 @@ SHADOW_BAR = 5
 job -- pure white is available for the light half -- so these stay modest."""
 GAP_SECTION = 6
 RADIUS_PANEL = 16
-RADIUS_CTRL = 9
+RADIUS_CTRL = 12
 """The shadow needs curvature to wrap around; sharp corners break it."""
 CONSTANTS_WIDTH = 300
 
@@ -152,17 +152,18 @@ def stylesheet() -> str:
     }}
     QMainWindow, QWidget#root {{ background: {SURFACE}; }}
 
+    /* Small labels: 11px, weight 500, 0.06em, muted -- quiet, not cramped. */
     QLabel#panelTitle {{
-        color: {TEXT_2};
+        color: {TEXT_3};
         font-size: {SIZE_PANEL}px;
-        font-weight: 600;
-        letter-spacing: 1px;
+        font-weight: 500;
+        letter-spacing: 0.66px;
     }}
     QLabel#sectionTitle {{
         color: {TEXT_3};
         font-size: {SIZE_SECTION}px;
-        font-weight: 600;
-        letter-spacing: 1px;
+        font-weight: 500;
+        letter-spacing: 0.66px;
     }}
     QLabel#label {{ color: {TEXT_2}; }}
     QLabel#value {{
@@ -205,57 +206,7 @@ def stylesheet() -> str:
     }}
 
     /* The one primary fill in the view. */
-    QPushButton#run {{
-        background: {ACCENT};
-        color: #ffffff;
-        border: none;
-        border-radius: {RADIUS_CTRL}px;
-        padding: 7px 18px;
-        font-weight: 600;
-    }}
-    QPushButton#run:hover {{ background: #5f66ef; }}
-    QPushButton#run:pressed {{ background: {ACCENT_SHADE}; }}
-
     /* Secondary controls: raised surface plus an interactive border. */
-    QPushButton#transport {{
-        background: {SURFACE};
-        border: 1px solid {BORDER_INTERACTIVE};
-        border-radius: {RADIUS_CTRL}px;
-        padding: 4px 11px;
-        color: {TEXT_2};
-    }}
-    QPushButton#transport:hover {{ color: {TEXT}; }}
-    QPushButton#transport:checked {{
-        background: {ACCENT};
-        border-color: {ACCENT};
-        color: #ffffff;
-    }}
-
-    QCheckBox {{ color: {TEXT_2}; }}
-    QCheckBox::indicator {{
-        width: 15px; height: 15px;
-        border-radius: {RADIUS_CTRL}px;
-        border: 1px solid {BORDER_INTERACTIVE};
-        background: {SURFACE_SUNKEN};
-    }}
-    QCheckBox::indicator:checked {{
-        background: {ACCENT};
-        border-color: {ACCENT};
-    }}
-
-    QSlider::groove:horizontal {{
-        background: {SURFACE_SUNKEN}; height: 6px; border-radius: 3px;
-        border: 1px solid {BORDER};
-    }}
-    QSlider::sub-page:horizontal {{
-        background: {ACCENT}; height: 6px; border-radius: 3px;
-    }}
-    QSlider::handle:horizontal {{
-        background: {ACCENT}; width: 12px; height: 12px;
-        margin: -4px 0; border-radius: 6px;
-        border: 2px solid {SURFACE};
-    }}
-
     QScrollArea {{ border: none; background: transparent; }}
     QScrollBar:vertical {{ background: transparent; width: 8px; margin: 0; }}
     QScrollBar::handle:vertical {{

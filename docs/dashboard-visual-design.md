@@ -48,6 +48,26 @@ and caches them per size. A raised frame reserves `3 * offset + 2` px of margin
 for its own shadow, because Qt clips painting to the widget rectangle and an
 unreserved shadow is cropped into a bevel.
 
+### Coloured masses
+
+A colour fill is not a flat pill. It extrudes from the same surface under the
+same light -- the outer dual shadow does that -- and carries one inset layer in a
+darker step of its **own** hue, gathered along the lower-right interior, so it
+reads as a solid object rather than a rectangle wearing a shadow. Never a
+coloured drop shadow (that floats the element above the page instead of out of
+it), and never a white sheen (it reads as a different material and composites
+over the label).
+
+Applies to Run, the active speed chip, the checked slip box and the scrub thumb.
+Painted by `dpc/ui/widgets.py`, since a stylesheet can express none of it.
+
+### Press
+
+Raised to inset over 170 ms, `OutCubic`, with the label travelling one pixel
+with the surface it sits on. The two shadows cross-fade rather than swap, so a
+press reads as travel. A checked toggle returns to raised -- the fill carries
+the state, and a toggle left depressed reads as stuck.
+
 ### Affordance
 
 A neumorphic shadow sits near 1.2:1 and cannot satisfy WCAG 1.4.11, so it never
@@ -112,8 +132,8 @@ depend on. Preference order is IBM Plex, then the platform's own faces.
 | Use | Face | Size / weight / tracking |
 |---|---|---|
 | window title | Sans | 13 / 600 |
-| panel title | Sans | 10 / 600 / 0.09em, uppercase |
-| section heading | Sans | 9.5 / 600 / 0.11em, uppercase |
+| panel title | Sans | 11 / 500 / 0.06em, uppercase, muted |
+| section heading | Sans | 11 / 500 / 0.06em, uppercase, muted |
 | constant label | Sans | 11 / 400 |
 | constant value | Mono | 11.5 / 400 |
 | canvas readout | Mono | 15 / 400 |
@@ -126,7 +146,7 @@ depend on. Preference order is IBM Plex, then the platform's own faces.
   each raised frame already reserves its own 17 px shadow margin on every side.
   The visible gap between two cards is that margin twice over, which lands in
   the 24-32 px the style asks for. Adding a layout gap on top would double it.
-- Radius 16 on panels, 9 on controls. Border 1 px `#383c45`.
+- Radius 16 on panels, 12 on controls. Border 1 px `#383c45`.
 - Constants column 300 px fixed.
 - Plot trace 1.6 px; limit lines 0.9 px dashed.
 
