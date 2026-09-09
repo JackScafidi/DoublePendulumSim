@@ -239,6 +239,21 @@ class Params:
         }
 
     def vector(self) -> tuple[float, ...]:
-        """Effective values in EFFECTIVE_NAMES order, for lambdified functions."""
-        eff = self.effective()
-        return tuple(eff[name] for name in EFFECTIVE_NAMES)
+        """Effective values in EFFECTIVE_NAMES order, for lambdified functions.
+
+        Memoised on the instance. Every lambdified call -- M, Cqd, G, Ffric --
+        asks for this, so it is rebuilt four times per solve and forty times per
+        control tick at substeps=10. Assembling the dict costs 1.7 us, about 29%
+        of what a solve costs in total.
+
+        Params is frozen, so object.__setattr__ is the way in. The cache lives in
+        __dict__ rather than in a declared field, which leaves the
+        dataclass-generated __eq__ and __hash__ untouched -- both read the
+        declared fields only.
+        """
+        cached = self.__dict__.get("_vector_cache")
+        if cached is None:
+            eff = self.effective()
+            cached = tuple(eff[name] for name in EFFECTIVE_NAMES)
+            object.__setattr__(self, "_vector_cache", cached)
+        return cached
