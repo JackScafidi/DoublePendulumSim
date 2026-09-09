@@ -51,7 +51,7 @@ def test_the_cursor_never_runs_past_the_head(dash):
     dash.run()
     for _ in range(20):
         dash.tick(dt=0.02)
-    assert dash.cursor <= dash.buffer.t_head + 1e-9
+    assert dash.play_head <= dash.buffer.t_head + 1e-9
 
 
 def test_editing_a_constant_reaches_the_source(dash):
@@ -72,7 +72,7 @@ def test_scrubbing_back_reviews_history_without_resimulating(dash):
     head = dash.buffer.t_head
     n = len(dash.buffer)
     dash._on_scrub(head / 2.0)
-    assert dash.cursor == pytest.approx(head / 2.0)
+    assert dash.play_head == pytest.approx(head / 2.0)
     assert len(dash.buffer) == n
 
 

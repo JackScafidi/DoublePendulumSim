@@ -10,20 +10,30 @@ at the top left, blur twice the offset, and a fill that is the same colour as
 the surface unless it is deliberately a coloured mass.
 """
 
+from typing import TYPE_CHECKING
+
 from PySide6.QtCore import (QEasingCurve, QPointF, QRectF, Qt, QVariantAnimation,
                             Signal)
 from PySide6.QtGui import QColor, QFont, QPainter, QPainterPath, QPen
-from PySide6.QtWidgets import QAbstractButton, QSlider, QStyle
+from PySide6.QtWidgets import QAbstractButton, QSlider, QWidget
 
 from dpc.ui import theme as T
 from dpc.ui.neumorphic import inner_shade_pixmap, inset_pixmap, raised_pixmap
+
+if TYPE_CHECKING:      # pragma: no cover
+    _HostBase = QWidget
+else:
+    _HostBase = object
+"""_Extruded calls width(), height() and update(), so it only makes sense mixed
+into a QWidget. Declaring that for the type checker without putting QWidget in
+the runtime MRO keeps the mixin out of PySide's multiple-inheritance rules."""
 
 PRESS_MS = 170
 """Inside the 150-200 ms the design language asks for. Long enough to read as
 movement, short enough not to lag the click."""
 
 
-class _Extruded:
+class _Extruded(_HostBase):
     """Shared painting for a control that extrudes and can be pushed in.
 
     `depth` runs 0 (fully raised) to 1 (fully inset); the two shadows are
@@ -39,7 +49,7 @@ class _Extruded:
         self._cache: dict = {}
         self._anim = QVariantAnimation(self)
         self._anim.setDuration(PRESS_MS)
-        self._anim.setEasingCurve(QEasingCurve.OutCubic)
+        self._anim.setEasingCurve(QEasingCurve.Type.OutCubic)
         self._anim.valueChanged.connect(self._set_depth)
 
     def _set_depth(self, v) -> None:
@@ -63,6 +73,7 @@ class _Extruded:
             elif kind == "inset":
                 pm = inset_pixmap(w, h, self.offset, self.radius)
             else:
+                assert shade is not None, "the shade kind needs a colour"
                 pm = inner_shade_pixmap(w, h, max(2, self.offset - 1),
                                         self.radius, shade)
             self._cache[key] = pm
@@ -113,7 +124,7 @@ class NeumorphicButton(QAbstractButton, _Extruded):
         # Dialled back on coloured masses only -- see raised_pixmap.
         self.light_a = 0.5 if filled else 1.0
         self._pad_x, self._pad_y = padding
-        self.setCursor(Qt.PointingHandCursor)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
     def sizeHint(self):
         m = self.fontMetrics().size(0, self.text())
@@ -134,7 +145,7 @@ class NeumorphicButton(QAbstractButton, _Extruded):
 
     def paintEvent(self, event) -> None:
         q = QPainter(self)
-        q.setRenderHint(QPainter.Antialiasing)
+        q.setRenderHint(QPainter.RenderHint.Antialiasing)
         fill, shade, ink = self._colours()
         body = self._paint_body(q, fill, shade)
 
@@ -146,7 +157,7 @@ class NeumorphicButton(QAbstractButton, _Extruded):
         q.setPen(ink)
         # The label travels with the surface it sits on.
         q.translate(self._depth * 1.0, self._depth * 1.0)
-        q.drawText(body, Qt.AlignCenter, self.text())
+        q.drawText(body, Qt.AlignmentFlag.AlignCenter, self.text())
 
     def mousePressEvent(self, e) -> None:
         super().mousePressEvent(e)
@@ -173,7 +184,7 @@ class NeumorphicCheck(NeumorphicButton):
 
     def paintEvent(self, event) -> None:
         q = QPainter(self)
-        q.setRenderHint(QPainter.Antialiasing)
+        q.setRenderHint(QPainter.RenderHint.Antialiasing)
         on = self.isChecked()
         fill = QColor(T.ACCENT) if on else QColor(T.SURFACE_SUNKEN)
         shade = None
@@ -188,8 +199,8 @@ class NeumorphicCheck(NeumorphicButton):
                               self.radius, self.radius)
             return
 
-        q.setPen(QPen(QColor("#ffffff"), 2.0, Qt.SolidLine, Qt.RoundCap,
-                      Qt.RoundJoin))
+        q.setPen(QPen(QColor("#ffffff"), 2.0, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap,
+                      Qt.PenJoinStyle.RoundJoin))
         c = body.center()
         q.drawPolyline([QPointF(c.x() - 4.2, c.y() + 0.2),
                         QPointF(c.x() - 1.2, c.y() + 3.4),
@@ -204,7 +215,7 @@ class NeumorphicSlider(QSlider):
     """
 
     def __init__(self, parent=None):
-        super().__init__(Qt.Horizontal, parent)
+        super().__init__(Qt.Orientation.Horizontal, parent)
         self.setMinimumHeight(26)
         self._cache: dict = {}
 
@@ -224,7 +235,7 @@ class NeumorphicSlider(QSlider):
 
     def paintEvent(self, event) -> None:
         q = QPainter(self)
-        q.setRenderHint(QPainter.Antialiasing)
+        q.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         gh = 8
         pad = 11
@@ -252,7 +263,7 @@ class NeumorphicSlider(QSlider):
         q.drawPixmap(int(cx - d / 2.0 - 11), int(cy - d / 2.0 - 11),
                      raised_pixmap(d, d, 3, d / 2.0))
         q.setBrush(QColor(T.ACCENT))
-        q.setPen(Qt.NoPen)
+        q.setPen(Qt.PenStyle.NoPen)
         q.drawEllipse(rect)
         q.drawPixmap(int(cx - d / 2.0 - 11), int(cy - d / 2.0 - 11),
                      self._thumb_shade(d))

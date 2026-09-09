@@ -5,6 +5,7 @@ state. The window owns the clock.
 """
 
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QStandardItemModel
 from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QWidget
 
 from dpc.controllers.registry import Entry
@@ -42,9 +43,11 @@ class SelectorPanel(QWidget):
             self.controller.addItem(e.label, e.key)
         # A controller that failed to import is listed but cannot be chosen --
         # visible, so a typo is diagnosable, and inert, so it cannot be run.
-        for i, e in enumerate(entries):
-            if e.error:
-                self.controller.model().item(i).setEnabled(False)
+        model = self.controller.model()
+        if isinstance(model, QStandardItemModel):
+            for i, e in enumerate(entries):
+                if e.error:
+                    model.item(i).setEnabled(False)
         self.controller.currentIndexChanged.connect(self.controller_changed)
 
         self.scenario = QComboBox()

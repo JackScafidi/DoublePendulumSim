@@ -101,7 +101,7 @@ class AnimationPanel(QWidget):
 
     def paintEvent(self, event) -> None:
         q = QPainter(self)
-        q.setRenderHint(QPainter.Antialiasing)
+        q.setRenderHint(QPainter.RenderHint.Antialiasing)
         q.fillRect(self.rect(), QColor(T.SURFACE_SUNKEN))
 
         p = self._params
@@ -134,10 +134,10 @@ class AnimationPanel(QWidget):
             y = int(self.height() * frac)
             q.drawLine(int(a.x()), y, int(b.x()), y)
 
-        q.setPen(QPen(QColor(T.RAIL), 3, Qt.SolidLine, Qt.RoundCap))
+        q.setPen(QPen(QColor(T.RAIL), 3, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
         q.drawLine(a, b)
 
-        q.setPen(QPen(QColor(T.TEXT_3), 2, Qt.SolidLine, Qt.RoundCap))
+        q.setPen(QPen(QColor(T.TEXT_3), 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
         for end in (a, b):
             q.drawLine(QPointF(end.x(), end.y() - 12), QPointF(end.x(), end.y() + 12))
 
@@ -145,7 +145,7 @@ class AnimationPanel(QWidget):
         q.setPen(QColor(T.TEXT_3))
         f = QFont(T.fonts()[0], T.SIZE_LABEL)
         q.setFont(f)
-        q.drawText(self.rect(), Qt.AlignCenter, "Press Run")
+        q.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, "Press Run")
 
     def _draw_trail(self, q, to_px) -> None:
         """The link-2 tip's recent path. The one decoration here, and it earns
@@ -154,7 +154,7 @@ class AnimationPanel(QWidget):
             return
         col = QColor(T.TH2)
         col.setAlpha(T.TRAIL_ALPHA)
-        q.setPen(QPen(col, 2, Qt.SolidLine, Qt.RoundCap))
+        q.setPen(QPen(col, 2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
         pts = [to_px(x, y) for x, y in self._trail]
         for i in range(1, len(pts)):
             q.drawLine(pts[i - 1], pts[i])
@@ -169,9 +169,9 @@ class AnimationPanel(QWidget):
         """
         col = QColor(T.X_COUNT)
         col.setAlpha(166)
-        pen = QPen(col, 1.5, Qt.DashLine)
+        pen = QPen(col, 1.5, Qt.PenStyle.DashLine)
         q.setPen(pen)
-        q.setBrush(Qt.NoBrush)
+        q.setBrush(Qt.BrushStyle.NoBrush)
         c = to_px(s.x_count, 0.0)
         q.drawRoundedRect(QRectF(c.x() - 36, c.y() - 16, 72, 32), 4, 4)
 
@@ -183,7 +183,7 @@ class AnimationPanel(QWidget):
         q.setPen(QPen(QColor(T.CART_EDGE), 1.5))
         q.setBrush(QColor(T.SURFACE))
         q.drawRoundedRect(QRectF(cart.x() - 36, cart.y() - 16, 72, 32), 4, 4)
-        q.setBrush(Qt.NoBrush)
+        q.setBrush(Qt.BrushStyle.NoBrush)
 
         ex = x + e["l1"] * math.sin(th1)
         ey = e["l1"] * math.cos(th1)
@@ -192,9 +192,9 @@ class AnimationPanel(QWidget):
 
         pivot, elbow, tip = to_px(x, 0.0), to_px(ex, ey), to_px(tx, ty)
 
-        q.setPen(QPen(QColor(T.TH1), T.LINK_W, Qt.SolidLine, Qt.RoundCap))
+        q.setPen(QPen(QColor(T.TH1), T.LINK_W, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
         q.drawLine(pivot, elbow)
-        q.setPen(QPen(QColor(T.TH2), T.LINK_W, Qt.SolidLine, Qt.RoundCap))
+        q.setPen(QPen(QColor(T.TH2), T.LINK_W, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
         q.drawLine(elbow, tip)
 
         # Hollow joints: a ring in the link colour over the window ground, so
@@ -204,10 +204,10 @@ class AnimationPanel(QWidget):
             q.setPen(QPen(QColor(colour), T.JOINT_RING))
             q.drawEllipse(centre, T.JOINT_R, T.JOINT_R)
 
-        q.setPen(Qt.NoPen)
+        q.setPen(Qt.PenStyle.NoPen)
         q.setBrush(QColor(T.TH2))
         q.drawEllipse(tip, 4, 4)
-        q.setBrush(Qt.NoBrush)
+        q.setBrush(Qt.BrushStyle.NoBrush)
 
     def _draw_readout(self, q, s: Sample) -> None:
         th1, th2 = self._angles(s)

@@ -50,9 +50,13 @@ class Dashboard(QMainWindow):
         self.source = SimSource(self.model, self.params)
         self.buffer = SampleBuffer()
 
-        self.cursor = 0.0
+        self.play_head = 0.0
         """s. What is being drawn -- equal to the buffer head when live, behind
-        it when scrubbing back through history."""
+        it when scrubbing back through history.
+
+        Not `cursor`: QWidget already has a cursor() method returning a QCursor,
+        and shadowing it with a float means any Qt code that asks this window
+        for its cursor gets a number instead."""
         self.speed = 1.0
         self.playing = True
         self._t_wall = time.perf_counter()
@@ -136,7 +140,7 @@ class Dashboard(QMainWindow):
     def _on_scrub(self, t: float) -> None:
         """Scrubbing back reviews the buffer; the source is never asked for
         anything it has already produced."""
-        self.cursor = t
+        self.play_head = t
         self._t_wall = time.perf_counter()
         self._render()
 
@@ -156,7 +160,7 @@ class Dashboard(QMainWindow):
         self.source.params = self.params
         self.source.start(build(entry, self._controller_values), scenario)
 
-        self.cursor = 0.0
+        self.play_head = 0.0
         self._t_wall = time.perf_counter()
         self.transport.set_range(scenario.t_end)
         self.transport.set_status("")
@@ -176,9 +180,9 @@ class Dashboard(QMainWindow):
         self._t_wall = now
 
         if self.playing and not self.source.done:
-            self.cursor = min(self.cursor + dt * self.speed,
+            self.play_head = min(self.play_head + dt * self.speed,
                               self.buffer.t_head + 1.0)
-            got = self.source.poll(self.cursor)
+            got = self.source.poll(self.play_head)
             for s in got:
                 self.buffer.append(s)
             if len(got) >= self.source.max_ticks_per_poll:
@@ -188,20 +192,20 @@ class Dashboard(QMainWindow):
 
         # Never draw ahead of what exists: the cursor may have run past the
         # head when the solver could not keep up.
-        self.cursor = min(self.cursor, self.buffer.t_head)
+        self.play_head = min(self.play_head, self.buffer.t_head)
         self._render()
 
     def _render(self) -> None:
-        self.transport.set_cursor(self.cursor)
-        self.animation.show_sample(self.buffer.at(self.cursor), self.params)
+        self.transport.set_cursor(self.play_head)
+        self.animation.show_sample(self.buffer.at(self.play_head), self.params)
         self.plots.redraw(self.buffer.window(
-            max(0.0, self.cursor - WINDOW_S), self.cursor))
+            max(0.0, self.play_head - WINDOW_S), self.play_head))
         self._render_live()
 
     def _render_live(self) -> None:
         import math
 
-        s = self.buffer.at(self.cursor)
+        s = self.buffer.at(self.play_head)
         if s is None:
             self.constants.set_live([("—", "no run yet", "")])
             return
