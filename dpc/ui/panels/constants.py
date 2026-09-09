@@ -31,7 +31,7 @@ DRIVE_FIELDS = (
 def _row(label: str, widget: QWidget) -> QWidget:
     w = QWidget()
     h = QHBoxLayout(w)
-    h.setContentsMargins(0, 1, 0, 1)
+    h.setContentsMargins(0, 0, 0, 0)
     h.setSpacing(8)
     lab = QLabel(label)
     lab.setObjectName("label")
@@ -69,12 +69,12 @@ class ConstantsPanel(QScrollArea):
         super().__init__(parent)
         self.setWidgetResizable(True)
         self.setFixedWidth(T.CONSTANTS_WIDTH)
+        self.setFrameShape(QFrame.NoFrame)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self._body = QWidget()
         self._v = QVBoxLayout(self._body)
-        self._v.setContentsMargins(T.PAD_PANEL + 4, T.PAD_PANEL + 4,
-                                   T.PAD_PANEL + 4, T.PAD_PANEL + 8)
+        self._v.setContentsMargins(2, 0, 8, 2)
         self._v.setSpacing(T.GAP_SECTION)
         self.setWidget(self._body)
 
@@ -114,7 +114,7 @@ class ConstantsPanel(QScrollArea):
         s.setDecimals(3 if step < 0.1 else 2)
         s.setValue(value)
         s.setSuffix(f" {unit}" if unit else "")
-        s.setFixedWidth(132)
+        s.setFixedWidth(124)
         s.setAlignment(Qt.AlignRight)
         s.valueChanged.connect(lambda v, n=name: self.changed.emit(n, float(v)))
         return s
