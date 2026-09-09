@@ -8,6 +8,7 @@
       "module": "dpc.ui.app",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe",
       "justMyCode": true
     },
     {
@@ -17,6 +18,7 @@
       "module": "dpc.ui.app",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe",
       "justMyCode": false
     },
     {
@@ -26,6 +28,7 @@
       "program": "${file}",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe",
       "justMyCode": true
     }
   ]
