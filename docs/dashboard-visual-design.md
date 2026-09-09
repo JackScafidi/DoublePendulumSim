@@ -102,9 +102,12 @@ depend on. Preference order is IBM Plex, then the platform's own faces.
 
 ## Spacing and shape
 
-- Scale: 4 (icon gaps, chip padding), 8 (inside panels), 12 (between panels),
-  16 (window padding), 18 (constants sections).
-- Radius 4 on panels, 3 on controls. Border 1 px `#232A33`.
+- Scale: 4 (icon gaps), 8 (inside panels), 6 (constants sections).
+- Layout gaps are small -- 2 px between cards, 2 px window padding -- because
+  each raised frame already reserves its own 17 px shadow margin on every side.
+  The visible gap between two cards is that margin twice over, which lands in
+  the 24-32 px the style asks for. Adding a layout gap on top would double it.
+- Radius 16 on panels, 9 on controls. Border 1 px `#383c45`.
 - Constants column 300 px fixed.
 - Plot trace 1.6 px; limit lines 0.9 px dashed.
 
