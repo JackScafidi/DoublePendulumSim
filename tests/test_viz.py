@@ -6,7 +6,7 @@ import numpy as np  # noqa: E402
 
 from dpc.model import ModelConfig, build  # noqa: E402
 from dpc.params import Params  # noqa: E402
-from dpc.control import ConstantController  # noqa: E402
+from dpc.controllers.basic import ConstantController  # noqa: E402
 from dpc.simulate import run, simulate  # noqa: E402
 from dpc.viz import plot_run, plot_trajectory  # noqa: E402
 

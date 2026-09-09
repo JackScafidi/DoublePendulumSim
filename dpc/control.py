@@ -9,9 +9,9 @@ boundary.
 Estimation lives on this side of the wire, inside the controller, because that
 is where it runs on the MCU.
 
-The two controllers here exist to prove the loop closes. Real control laws --
-balance, swing-up, and the mode logic between them -- are the next piece of
-work, and they go in this file without anything else changing.
+This module holds the contract only. The control laws themselves live in
+dpc/controllers/, one per module, each declaring its own tunable parameters so
+that adding one needs no changes anywhere else.
 """
 
 from dataclasses import dataclass, field
@@ -53,38 +53,3 @@ class Controller(Protocol):
     def update(self, m: Measurement) -> ControlOutput:
         """One control tick."""
         ...
-
-
-class ZeroController:
-    """Commands nothing, ever.
-
-    Lets the whole chain -- measurement, controller, motor, plant -- run without
-    perturbing the physics, which is how the plumbing gets tested separately
-    from any control law.
-    """
-
-    def reset(self, p: Params) -> None:
-        pass
-
-    def update(self, m: Measurement) -> ControlOutput:
-        return ControlOutput(a_cmd=0.0, mode="idle")
-
-
-class ConstantController:
-    """Commands a fixed acceleration.
-
-    Held long enough this walks the motor model through its jerk limit, then
-    its acceleration saturation, then its velocity ceiling, in that order --
-    which exercises every stage of the actuator without needing a control law.
-    """
-
-    __slots__ = ("a",)
-
-    def __init__(self, a: float):
-        self.a = a
-
-    def reset(self, p: Params) -> None:
-        pass
-
-    def update(self, m: Measurement) -> ControlOutput:
-        return ControlOutput(a_cmd=self.a, mode="constant")
