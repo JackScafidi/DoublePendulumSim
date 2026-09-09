@@ -24,7 +24,6 @@ from dpc.ui.panels.animation import AnimationPanel
 from dpc.ui.panels.constants import ConstantsPanel
 from dpc.ui.panels.controls import SelectorPanel, TransportPanel
 from dpc.ui.panels.plots import PlotPanel
-from dpc.ui.neumorphic import NeumorphicFrame
 from dpc.ui.panels.card import card
 from dpc.ui.sample import Command, SampleBuffer
 from dpc.ui.source import SimSource
