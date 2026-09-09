@@ -31,3 +31,5 @@ __pycache__/
 
 # Cached symbolic derivation
 dpc/.derivation_cache/
+
+.superpowers/
