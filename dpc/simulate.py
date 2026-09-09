@@ -15,6 +15,7 @@ from typing import Callable
 
 import numpy as np
 
+from dpc.dynamics import deriv
 from dpc.model import NumericModel
 from dpc.params import Params
 
@@ -41,10 +42,10 @@ def rk4_step(model: NumericModel, s: np.ndarray, F: float, dt: float,
     Written plainly for later transcription to C: four evaluations, one
     weighted sum, no allocation beyond the stage vectors.
     """
-    k1 = model.deriv(s, F, p)
-    k2 = model.deriv(s + 0.5 * dt * k1, F, p)
-    k3 = model.deriv(s + 0.5 * dt * k2, F, p)
-    k4 = model.deriv(s + dt * k3, F, p)
+    k1 = deriv(model, s, F, p)
+    k2 = deriv(model, s + 0.5 * dt * k1, F, p)
+    k3 = deriv(model, s + 0.5 * dt * k2, F, p)
+    k4 = deriv(model, s + dt * k3, F, p)
     return s + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
 
 

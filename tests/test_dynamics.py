@@ -1,7 +1,11 @@
+import numpy as np
 import pytest
 import sympy as sp
 
-from dpc.model import ModelConfig, S, derive, th1, th2
+from dpc.dynamics import (accel, deriv_accel, link_accel, motor_torque,
+                          required_force)
+from dpc.model import ModelConfig, S, build, derive, th1, th2
+from dpc.params import Friction, Nominal, Params
 
 
 def test_mass_matrix_is_symmetric():
@@ -104,3 +108,86 @@ def test_coriolis_terms_are_quadratic_in_velocity():
 def test_compliant_drive_is_not_implemented():
     with pytest.raises(NotImplementedError):
         derive(ModelConfig(drive="compliant"))
+
+
+# --------------------------------------------------------------------------
+# The block partition: rows 2-3 solved forwards, row 1 read backwards.
+# --------------------------------------------------------------------------
+
+NM = build(ModelConfig())
+
+STATES = [
+    np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
+    np.array([0.1, 0.3, -0.2, 0.4, -0.5, 0.6]),
+    np.array([-0.2, 2.9, 3.1, -0.3, 0.7, -0.8]),
+]
+
+ROUGH = Params(fric=Friction(b_cart=0.4, b1=0.01, b2=0.008,
+                             c_cart=0.5, c1=0.02, c2=0.015))
+
+
+@pytest.mark.parametrize("s", STATES)
+@pytest.mark.parametrize("F", [0.0, 1.5, -3.0])
+@pytest.mark.parametrize("p", [Params(), ROUGH])
+def test_partition_round_trips(s, F, p):
+    """Solving forwards then backwards must return the same numbers.
+
+    This is the whole partition under test at once: if any block index or sign
+    is wrong, the recovered force will not match the one we started from.
+    """
+    qdd = accel(NM, s, F, p)
+
+    qdd_l = link_accel(NM, s, qdd[0], p)
+    assert qdd_l == pytest.approx(qdd[1:], abs=1e-9)
+
+    assert required_force(NM, s, qdd[0], qdd_l, p) == pytest.approx(F, abs=1e-9)
+
+
+@pytest.mark.parametrize("s", STATES)
+def test_link_accel_ignores_the_rail(s):
+    """m_cart, m_rotor and rail friction live in row 1 alone.
+
+    This is the architectural claim of the whole milestone, asserted rather
+    than argued: the parameters the controller cannot measure well do not reach
+    the part of the plant the controller has to know.
+    """
+    base = ROUGH
+    perturbed = Params(
+        nominal=Nominal(m_cart=base.nominal.m_cart * 3.0,
+                        m_rotor=base.nominal.m_rotor * 0.5),
+        fric=Friction(b_cart=9.9, b1=base.fric.b1, b2=base.fric.b2,
+                      c_cart=7.7, c1=base.fric.c1, c2=base.fric.c2),
+    )
+
+    a_cart = 2.0
+    assert link_accel(NM, s, a_cart, base) == pytest.approx(
+        link_accel(NM, s, a_cart, perturbed), abs=1e-12)
+
+
+def test_required_force_does_depend_on_the_rail():
+    """The mirror of the test above: those parameters must still matter to the
+    motor, or they would be unobservable everywhere and could never be fitted."""
+    s = STATES[1]
+    light = ROUGH
+    heavy = Params(nominal=Nominal(m_cart=ROUGH.nominal.m_cart * 3.0),
+                   fric=ROUGH.fric)
+
+    a_cart = 2.0
+    f_light = required_force(NM, s, a_cart, link_accel(NM, s, a_cart, light), light)
+    f_heavy = required_force(NM, s, a_cart, link_accel(NM, s, a_cart, heavy), heavy)
+    assert abs(f_heavy) > abs(f_light)
+
+
+def test_motor_torque_is_force_times_pulley_radius():
+    p = Params()
+    assert motor_torque(10.0, p) == pytest.approx(10.0 * p.drive.r_pulley)
+
+
+@pytest.mark.parametrize("s", STATES)
+def test_deriv_accel_places_the_command_in_the_cart_slot(s):
+    a_cart = -1.25
+    p = Params()
+    d = deriv_accel(NM, s, a_cart, p)
+    assert d[0:3] == pytest.approx(s[3:6])
+    assert d[3] == pytest.approx(a_cart)
+    assert d[4:6] == pytest.approx(link_accel(NM, s, a_cart, p))
