@@ -1074,14 +1074,18 @@ class SimSource:
     """
 
     def __init__(self, model: NumericModel, params: Params, substeps: int = 2,
-                 max_ticks_per_poll: int = 5000):
+                 max_ticks_per_poll: int = 20000):
         self.model = model
         self.params = params
         self.substeps = substeps
         self.max_ticks_per_poll = max_ticks_per_poll
         """A large clock jump must not simulate minutes of plant inside one
         repaint. Hitting this cap means playback falls behind, which the UI
-        reports rather than hides."""
+        reports rather than hides.
+
+        Set well above a full scenario's tick count (5 s at 1 kHz is 5000) so
+        that reaching the end of a run is detected by the scenario check rather
+        than masked by this cap."""
 
         self._controller = None
         self._scenario: Scenario | None = None
@@ -1243,6 +1247,12 @@ dpc-dash = "dpc.ui.app:main"
 Install with `.venv/Scripts/python.exe -m pip install -e ".[ui,dev]"`.
 
 - [ ] **Step 2: Write the panels**
+
+The panel *bodies* are written against the palette Task 6 produces, so their
+code is not reproduced here -- it would be invented colour values that the
+design pass then contradicts. The **Interfaces** block above is the binding
+part: those signatures and signals are what Task 8 wires together, and they do
+not change whatever the design pass decides.
 
 Each panel is a `QWidget` that owns its layout and exposes the interface above.
 Rules that apply to all of them, and that the smoke test in Task 8 depends on:
