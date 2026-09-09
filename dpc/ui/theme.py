@@ -4,10 +4,12 @@ Every colour and size here comes from docs/dashboard-visual-design.md. Nothing
 in a panel invents one -- if a widget needs a colour it takes it from this
 module, so restyling is a change here rather than a search through five files.
 
-Signal colours are the validated dark categorical palette, assigned in fixed
-slot order: a signal's colour belongs to the signal, never to its position in a
-plot. The two cart traces sit closest together in colour-blind separation, which
-is why the step count is also dashed -- identity never rests on colour alone.
+Signal colours are the categorical palette re-stepped for a LIGHT surface: a
+signal's colour belongs to the signal, never to its position in a plot. Clearing
+3:1 against a near-white ground forces every hue darker than its dark-theme
+step, and naive darkening collapses aqua and amber into neighbouring browns --
+so those two were pushed apart in hue until the pair separated. The step count
+is dashed as well, so identity never rests on colour alone.
 """
 
 # Surfaces and ink
@@ -17,42 +19,42 @@ is why the step count is also dashed -- identity never rests on colour alone.
 # not a ladder of them. The only other surface is the sunken well that data
 # lives in, which is darker because traces need the contrast.
 
-SURFACE = "#2c2f36"
-SURFACE_SUNKEN = "#24272d"
-SHADOW_LIGHT = "#3d424d"
-SHADOW_DARK = "#191b20"
+SURFACE = "#e6e7ee"
+SURFACE_SUNKEN = "#dcdde5"
+SHADOW_LIGHT = "#ffffff"
+SHADOW_DARK = "#c3c4ca"
 
 WINDOW = SURFACE
 PANEL = SURFACE
 RAISED = SURFACE
-GRID = "#31353d"
-BORDER = "#383c45"
-BORDER_INTERACTIVE = "#6a7080"
+GRID = "#cbccd6"
+BORDER = "#cfd0d8"
+BORDER_INTERACTIVE = "#7a7d92"
 """Shadow sits near 1.2:1 and cannot carry affordance under WCAG 1.4.11. Any
 control that is not a colour fill takes this border instead."""
 
-TEXT = "#E6EAF0"
-TEXT_2 = "#9aa2b1"
-TEXT_3 = "#6f7686"
+TEXT = "#2b2d42"
+TEXT_2 = "#5c5f72"
+TEXT_3 = "#7a7d92"
 ACCENT = "#5057e8"
 ACCENT_SHADE = "#3b41c4"
 """Indigo, distinct from the theta-1 blue: chrome must never wear a signal's
 colour, or the same hue would mean two things."""
 
 # Signals
-TH1 = "#3987e5"
-TH2 = "#d95926"
-X_TRUE = "#199e70"
-X_COUNT = "#c98500"
-A_CMD = "#d55181"
+TH1 = "#2a78d6"
+TH2 = "#b4531f"
+X_TRUE = "#12795a"
+X_COUNT = "#a35400"
+A_CMD = "#b03a67"
 A_DEL = "#008300"
-TAU = "#9085e9"
-LIMIT = "#d03b3b"
+TAU = "#4a3aa7"
+LIMIT = "#a82b3f"
 """Reserved status value, not a ninth series: it marks a threshold, never data,
 which is why it may repeat across plots without implying a relationship."""
 
-CART_EDGE = "#454b57"
-RAIL = "#3b414c"
+CART_EDGE = "#a9abb8"
+RAIL = "#b9bac4"
 
 # Type
 #
@@ -114,9 +116,8 @@ margin twice over, which lands in the 24-32 px the style wants."""
 SHADOW_CARD = 5
 SHADOW_WELL = 3
 SHADOW_BAR = 5
-"""Extrusion offsets. Blur is twice the offset. Dark neumorphism has little
-headroom before the dark shadow hits black, so these run larger than the light
-theme's to stay findable."""
+"""Extrusion offsets. Blur is twice the offset. A light theme has the easier
+job -- pure white is available for the light half -- so these stay modest."""
 GAP_SECTION = 6
 RADIUS_PANEL = 16
 RADIUS_CTRL = 9
@@ -128,8 +129,9 @@ LIMIT_W = 0.9
 LINK_W = 7
 JOINT_R = 5.5
 JOINT_RING = 2.5
-TRAIL_ALPHA = 56
-"""0-255. 22% of full, per the design."""
+TRAIL_ALPHA = 74
+"""0-255. A touch heavier than the dark theme's: a faint trace disappears
+against a light ground long before it does against a dark one."""
 
 
 def stylesheet() -> str:
