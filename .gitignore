@@ -33,3 +33,6 @@ __pycache__/
 dpc/.derivation_cache/
 
 .superpowers/
+
+# Seeded design-canvas output (regenerate with the design skill)
+docs/design/pendulum-dashboard.html

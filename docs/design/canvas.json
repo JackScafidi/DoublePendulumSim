@@ -1,0 +1,16 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 900, "title": "Dashboard" },
+    { "file": "Tokens.dc.html", "x": 1560, "y": 0, "w": 900, "h": 900, "title": "Tokens" }
+  ],
+  "annotations": [
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -150,
+      "w": 460,
+      "text": "Layout B, as agreed: constants column full height on the right; selectors, mechanism, transport, 2x2 plots down the left.\n\nThe plot traces are real dpc output - a 6 m/s^2 push held 0.35 s from hanging - not drawn curves."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}
