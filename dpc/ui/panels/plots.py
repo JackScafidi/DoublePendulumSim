@@ -16,8 +16,9 @@ from PySide6.QtWidgets import QGridLayout, QWidget
 
 from dpc.params import Params
 from dpc.ui import theme as T
+from dpc.ui.panels.card import card
 
-pg.setConfigOption("background", T.PANEL)
+pg.setConfigOption("background", T.SURFACE_SUNKEN)
 pg.setConfigOption("foreground", T.TEXT_3)
 pg.setConfigOption("antialias", True)
 
@@ -65,15 +66,18 @@ class PlotPanel(QWidget):
         self.accel = _Plot("Acceleration", "m/s²")
         self.torque = _Plot("Motor torque", "mN·m")
 
-        grid.addWidget(self.angles, 0, 0)
-        grid.addWidget(self.cart, 0, 1)
-        grid.addWidget(self.accel, 1, 0)
-        grid.addWidget(self.torque, 1, 1)
+        # Each plot is its own raised card sitting on the page, rather than
+        # four plots inside one card: nesting a raised surface in a raised
+        # surface of the same colour cancels both.
+        grid.addWidget(card(None, self.angles), 0, 0)
+        grid.addWidget(card(None, self.cart), 0, 1)
+        grid.addWidget(card(None, self.accel), 1, 0)
+        grid.addWidget(card(None, self.torque), 1, 1)
 
         # Legends: two or more series are never distinguished by colour alone.
         for plot in (self.angles, self.cart, self.accel):
             plot.addLegend(offset=(-8, 6), labelTextColor=T.TEXT_2,
-                           brush=pg.mkBrush(T.PANEL), pen=pg.mkPen(T.BORDER))
+                           brush=pg.mkBrush(T.SURFACE_SUNKEN), pen=pg.mkPen(T.BORDER))
 
         self.c_th1 = self.angles.plot(pen=_pen(T.TH1), name="θ₁")
         self.c_th2 = self.angles.plot(pen=_pen(T.TH2), name="θ₂")

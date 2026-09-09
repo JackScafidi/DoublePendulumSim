@@ -102,7 +102,7 @@ class AnimationPanel(QWidget):
     def paintEvent(self, event) -> None:
         q = QPainter(self)
         q.setRenderHint(QPainter.Antialiasing)
-        q.fillRect(self.rect(), QColor(T.PANEL))
+        q.fillRect(self.rect(), QColor(T.SURFACE_SUNKEN))
 
         p = self._params
         k, cx, cy, half_rail = self._scale(p)
@@ -181,7 +181,7 @@ class AnimationPanel(QWidget):
 
         cart = to_px(x, 0.0)
         q.setPen(QPen(QColor(T.CART_EDGE), 1.5))
-        q.setBrush(QColor(T.RAISED))
+        q.setBrush(QColor(T.SURFACE))
         q.drawRoundedRect(QRectF(cart.x() - 36, cart.y() - 16, 72, 32), 4, 4)
         q.setBrush(Qt.NoBrush)
 
@@ -199,7 +199,7 @@ class AnimationPanel(QWidget):
 
         # Hollow joints: a ring in the link colour over the window ground, so
         # crossing links stay readable where they overlap.
-        q.setBrush(QColor(T.WINDOW))
+        q.setBrush(QColor(T.SURFACE_SUNKEN))
         for centre, colour in ((pivot, T.TH1), (elbow, T.TH2)):
             q.setPen(QPen(QColor(colour), T.JOINT_RING))
             q.drawEllipse(centre, T.JOINT_R, T.JOINT_R)

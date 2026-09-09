@@ -24,6 +24,8 @@ from dpc.ui.panels.animation import AnimationPanel
 from dpc.ui.panels.constants import ConstantsPanel
 from dpc.ui.panels.controls import SelectorPanel, TransportPanel
 from dpc.ui.panels.plots import PlotPanel
+from dpc.ui.neumorphic import NeumorphicFrame
+from dpc.ui.panels.card import card
 from dpc.ui.sample import Command, SampleBuffer
 from dpc.ui.source import SimSource
 
@@ -34,20 +36,6 @@ starts competing with the paint."""
 WINDOW_S = 6.0
 """How much history the plots show. Longer than any shipped scenario, so a
 whole run stays visible; on a long hardware session it becomes a moving window."""
-
-
-def _panel(title: str, body: QWidget) -> QFrame:
-    frame = QFrame()
-    frame.setObjectName("panel")
-    v = QVBoxLayout(frame)
-    v.setContentsMargins(1, 1, 1, 1)
-    v.setSpacing(0)
-    head = QLabel(title.upper())
-    head.setObjectName("panelTitle")
-    head.setContentsMargins(T.PAD_PANEL + 2, 6, T.PAD_PANEL + 2, 5)
-    v.addWidget(head)
-    v.addWidget(body, 1)
-    return frame
 
 
 class Dashboard(QMainWindow):
@@ -84,6 +72,7 @@ class Dashboard(QMainWindow):
 
     def _build(self) -> None:
         root = QWidget()
+        root.setObjectName("root")
         outer = QHBoxLayout(root)
         outer.setContentsMargins(T.PAD_WINDOW, T.PAD_WINDOW,
                                  T.PAD_WINDOW, T.PAD_WINDOW)
@@ -100,18 +89,13 @@ class Dashboard(QMainWindow):
         left.addWidget(self.selectors)
 
         self.animation = AnimationPanel()
-        left.addWidget(_panel("Mechanism", self.animation), 5)
+        left.addWidget(card("Mechanism", self.animation), 5)
 
         self.transport = TransportPanel()
         self.transport.play_toggled.connect(self._on_play)
         self.transport.speed_changed.connect(self._on_speed)
         self.transport.scrubbed.connect(self._on_scrub)
-        frame = QFrame()
-        frame.setObjectName("panel")
-        fv = QVBoxLayout(frame)
-        fv.setContentsMargins(0, 0, 0, 0)
-        fv.addWidget(self.transport)
-        left.addWidget(frame)
+        left.addWidget(card(None, self.transport, well=False))
 
         self.plots = PlotPanel()
         left.addWidget(self.plots, 6)
@@ -120,7 +104,7 @@ class Dashboard(QMainWindow):
 
         self.constants = ConstantsPanel()
         self.constants.changed.connect(self._on_constant_changed)
-        outer.addWidget(self.constants)
+        outer.addWidget(card(None, self.constants, well=False))
 
         self.setCentralWidget(root)
 
