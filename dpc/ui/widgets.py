@@ -32,6 +32,7 @@ class _Extruded:
 
     def _init_extrusion(self, offset: int, radius: float) -> None:
         self.offset = offset
+        self.light_a = 1.0
         self.radius = radius
         self.pad = offset * 3 + 2
         self._depth = 0.0
@@ -55,7 +56,10 @@ class _Extruded:
         key = (kind, w, h)
         if key not in self._cache:
             if kind == "raised":
-                pm = raised_pixmap(w, h, self.offset, self.radius)
+                # A control is small enough that a full-strength light halo
+                # reads as an outline rather than a highlight.
+                pm = raised_pixmap(w, h, self.offset, self.radius,
+                                   light=self.light_a, dark=0.85)
             elif kind == "inset":
                 pm = inset_pixmap(w, h, self.offset, self.radius)
             else:
@@ -106,6 +110,8 @@ class NeumorphicButton(QAbstractButton, _Extruded):
         self._init_extrusion(offset, T.RADIUS_CTRL if radius is None else radius)
         self.setText(text)
         self.filled = filled
+        # Dialled back on coloured masses only -- see raised_pixmap.
+        self.light_a = 0.5 if filled else 1.0
         self._pad_x, self._pad_y = padding
         self.setCursor(Qt.PointingHandCursor)
 
@@ -119,6 +125,7 @@ class NeumorphicButton(QAbstractButton, _Extruded):
 
     def _colours(self) -> tuple[QColor, QColor | None, QColor]:
         on = self.filled or (self.isCheckable() and self.isChecked())
+        self.light_a = 0.5 if on else 1.0
         if on:
             shade = QColor(T.ACCENT_SHADE)
             shade.setAlphaF(0.5)

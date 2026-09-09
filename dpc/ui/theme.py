@@ -36,6 +36,11 @@ control that is not a colour fill takes this border instead."""
 TEXT = "#2b2d42"
 TEXT_2 = "#5c5f72"
 TEXT_3 = "#7a7d92"
+MODIFIED = "#9a6700"
+"""Amber, after FTC Dashboard's marker for a variable moved off its default.
+Stepped dark enough to read on this surface -- their #fbbf24 sits near 1.7:1
+here. It marks a diff, never data, so it is not a series colour."""
+
 ACCENT = "#5057e8"
 ACCENT_SHADE = "#3b41c4"
 """Indigo, distinct from the theta-1 blue: chrome must never wear a signal's
@@ -177,6 +182,11 @@ def stylesheet() -> str:
         font-size: {SIZE_TICK}px;
     }}
     QLabel#note {{ color: {TEXT_3}; font-size: {SIZE_TICK}px; }}
+    QLabel#baseline {{
+        color: {TEXT_3};
+        font-family: "{mono}";
+        font-size: {SIZE_TICK}px;
+    }}
     QLabel#status {{
         color: {TEXT_3};
         font-family: "{mono}";

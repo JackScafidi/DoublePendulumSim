@@ -53,7 +53,7 @@ class SelectorPanel(QWidget):
 
         # The one primary fill in the view: a coloured mass that extrudes from
         # the surface and carries its own inner shade.
-        self.run = NeumorphicButton("Run", filled=True, offset=5)
+        self.run = NeumorphicButton("Run", filled=True, offset=4)
         self.run.clicked.connect(self.run_pressed)
 
         for label, widget in (("Controller", self.controller),
@@ -100,7 +100,7 @@ class TransportPanel(QWidget):
         h.setContentsMargins(T.PAD_PANEL, 6, T.PAD_PANEL, 6)
         h.setSpacing(T.GAP_PANEL)
 
-        self.play = NeumorphicButton("❚❚", offset=4, padding=(10, 6))
+        self.play = NeumorphicButton("❚❚", offset=3, padding=(10, 6))
         self.play.setCheckable(True)
         self.play.setChecked(True)
         self.play.toggled.connect(self._on_play)
@@ -120,7 +120,7 @@ class TransportPanel(QWidget):
 
         self._speed_buttons = []
         for s in self.SPEEDS:
-            b = NeumorphicButton(f"{s:g}×", offset=4, padding=(9, 5))
+            b = NeumorphicButton(f"{s:g}×", offset=3, padding=(9, 5))
             b.setCheckable(True)
             b.setChecked(s == 1.0)
             b.clicked.connect(lambda _, v=s: self._on_speed(v))

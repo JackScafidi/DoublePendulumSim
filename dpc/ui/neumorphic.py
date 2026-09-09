@@ -86,17 +86,28 @@ def _to_pixmap(rgba: np.ndarray) -> QPixmap:
     return QPixmap.fromImage(img.copy())
 
 
-def raised_pixmap(w: int, h: int, offset: int, radius: float) -> QPixmap:
-    """The two outer shadows, light up-left and dark down-right."""
+def raised_pixmap(w: int, h: int, offset: int, radius: float,
+                  light: float = 1.0, dark: float = 1.0) -> QPixmap:
+    """The two outer shadows, light up-left and dark down-right.
+
+    Both are clipped to OUTSIDE the element, exactly as a CSS box-shadow is.
+    Without that clip the blurred shape stays near-opaque across its whole
+    middle and only the body covers it, so the offset leaves a hard-edged
+    sliver -- a second shape peeking out from behind the first rather than a
+    soft halo around it. Barely visible on a large card, glaring on a button,
+    where the offset is a big fraction of the element.
+    """
     blur = offset * 2
     pad = blur + offset + 2
+    shape = _rounded_mask(w, h, pad, radius)
     mask = _blur_cache(w, h, pad, radius, blur)
+    outside = 1.0 - shape
 
-    light = np.roll(mask, (-offset, -offset), axis=(0, 1))
-    dark = np.roll(mask, (offset, offset), axis=(0, 1))
+    hi = np.roll(mask, (-offset, -offset), axis=(0, 1)) * outside
+    lo = np.roll(mask, (offset, offset), axis=(0, 1)) * outside
 
-    out = _tint(dark, QColor(T.SHADOW_DARK), 1.0)
-    out = _over(out, _tint(light, QColor(T.SHADOW_LIGHT), 1.0))
+    out = _tint(lo, QColor(T.SHADOW_DARK), dark)
+    out = _over(out, _tint(hi, QColor(T.SHADOW_LIGHT), light))
     return _to_pixmap(out)
 
 
