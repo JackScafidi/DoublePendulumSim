@@ -22,6 +22,14 @@ from dpc.params import Params
 ForceFn = Callable[[float, np.ndarray], float]
 """Control law: takes (time, state), returns the cart force in newtons."""
 
+DerivFn = Callable[[np.ndarray, float], np.ndarray]
+"""State derivative: takes (state, scalar input), returns the 6-vector.
+
+Taking a callable rather than a model is what lets one integrator serve both
+drive modes -- force-driven passes the force, stepper mode passes the delivered
+acceleration -- without the integrator ever knowing which it is.
+"""
+
 
 @dataclass(frozen=True)
 class Trajectory:
@@ -35,17 +43,16 @@ class Trajectory:
     """(n,) force held across the step that begins at the matching time."""
 
 
-def rk4_step(model: NumericModel, s: np.ndarray, F: float, dt: float,
-             p: Params) -> np.ndarray:
-    """One classical RK4 step with the force held constant across it.
+def rk4_step(f: DerivFn, s: np.ndarray, u: float, dt: float) -> np.ndarray:
+    """One classical RK4 step with the input held constant across it.
 
-    Written plainly for later transcription to C: four evaluations, one
+    Written plainly for later transcription to C++: four evaluations, one
     weighted sum, no allocation beyond the stage vectors.
     """
-    k1 = deriv(model, s, F, p)
-    k2 = deriv(model, s + 0.5 * dt * k1, F, p)
-    k3 = deriv(model, s + 0.5 * dt * k2, F, p)
-    k4 = deriv(model, s + dt * k3, F, p)
+    k1 = f(s, u)
+    k2 = f(s + 0.5 * dt * k1, u)
+    k3 = f(s + 0.5 * dt * k2, u)
+    k4 = f(s + dt * k3, u)
     return s + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
 
 
@@ -62,9 +69,12 @@ def simulate(model: NumericModel, s0: np.ndarray, force: ForceFn,
     F = np.empty(n + 1)
     s[0] = np.asarray(s0, dtype=float)
 
+    def f(state: np.ndarray, u: float) -> np.ndarray:
+        return deriv(model, state, u, p)
+
     for i in range(n):
         F[i] = force(t[i], s[i])
-        s[i + 1] = rk4_step(model, s[i], F[i], dt, p)
+        s[i + 1] = rk4_step(f, s[i], F[i], dt)
 
     F[n] = force(t[n], s[n])
     return Trajectory(t=t, s=s, F=F)
