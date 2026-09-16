@@ -144,8 +144,11 @@ def test_slip_makes_the_counter_diverge_from_what_was_delivered():
     residual anywhere to reveal it."""
     p = _p(slip_enable=True, tau_hold=1e-4, tau_derate=1.0)
     st = MotorState()
+    # Bounded so that fifty ticks of counting stay inside the rail: the
+    # divergence under test is slip, and a counter pinned against an end stop
+    # would be a different mechanism answering the question.
     for _ in range(50):
-        st = step(M, 5000.0, REST, st, TS, p).state
+        st = step(M, 100.0, REST, st, TS, p).state
     assert st.n_slip == 50
     assert abs(st.slip_accum) > 1e-6
     assert abs(st.v_count) > abs(st.v_count - st.slip_accum)

@@ -44,6 +44,9 @@ class Sample:
     slipped: bool
     """Whether the torque budget was exceeded on this tick."""
 
+    pinned: bool
+    """Whether the step counter was held against an end stop on this tick."""
+
     truth: np.ndarray | None = None
     """(6,) true state, or None.
 
@@ -78,7 +81,8 @@ class SampleBuffer:
     scrub bar works over both.
     """
 
-    __slots__ = ("_n", "_cap", "_cols", "_truth", "_mode", "_slipped")
+    __slots__ = ("_n", "_cap", "_cols", "_truth", "_mode", "_slipped",
+                 "_pinned")
 
     def __init__(self, capacity: int = 4096):
         self._n = 0
@@ -86,6 +90,7 @@ class SampleBuffer:
         self._cols = {name: np.empty(self._cap) for name in _CHANNELS}
         self._truth = np.full((self._cap, 6), np.nan)
         self._slipped = np.zeros(self._cap, dtype=bool)
+        self._pinned = np.zeros(self._cap, dtype=bool)
         self._mode: list[str] = []
 
     def __len__(self) -> int:
@@ -104,6 +109,7 @@ class SampleBuffer:
         truth[:self._n] = self._truth[:self._n]
         self._truth = truth
         self._slipped = np.resize(self._slipped, self._cap)
+        self._pinned = np.resize(self._pinned, self._cap)
 
     def append(self, s: Sample) -> None:
         if self._n == self._cap:
@@ -112,6 +118,7 @@ class SampleBuffer:
         for name in _CHANNELS:
             self._cols[name][i] = getattr(s, name)
         self._slipped[i] = s.slipped
+        self._pinned[i] = s.pinned
         self._truth[i] = np.nan if s.truth is None else s.truth
         self._mode.append(s.mode)
         self._n = i + 1
@@ -128,6 +135,7 @@ class SampleBuffer:
         hi = int(np.searchsorted(t, t1, side="right"))
         out = {name: self._cols[name][lo:hi] for name in _CHANNELS}
         out["slipped"] = self._slipped[lo:hi]
+        out["pinned"] = self._pinned[lo:hi]
         out["truth"] = self._truth[lo:hi]
         return out
 
@@ -147,5 +155,6 @@ class SampleBuffer:
             **{name: float(self._cols[name][i]) for name in _CHANNELS},
             mode=self._mode[i],
             slipped=bool(self._slipped[i]),
+            pinned=bool(self._pinned[i]),
             truth=None if np.isnan(truth[0]) else truth.copy(),
         )

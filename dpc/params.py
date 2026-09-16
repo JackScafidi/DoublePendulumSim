@@ -74,6 +74,20 @@ class Nominal:
     g: float = 9.81
     """m/s^2. Known, so it carries no correction factor."""
 
+    rail_len: float = 0.50
+    """m. Total cart travel between the end stops, measured, so no
+    correction factor. A constraint on the state, not a term in the
+    equations of motion: it must never enter EFFECTIVE_NAMES or
+    effective()."""
+
+    cart_len: float = 0.09
+    """m. Length of the carriage along the rail, from the CAD. The plant
+    treats the cart as a point mass, so this is a drawing dimension and
+    nothing else -- it exists so the animation can size the cart in metres
+    like every other object on the canvas instead of at a fixed pixel width
+    that means something different at every scale. Like rail_len, it must
+    never enter EFFECTIVE_NAMES or effective()."""
+
 
 @dataclass(frozen=True)
 class Corrections:
@@ -212,6 +226,11 @@ class Params:
 
     phi: float = 0.0
     """rad. Rail tilt from horizontal."""
+
+    @property
+    def x_lim(self) -> float:
+        """m. How far the cart can travel either side of centre."""
+        return self.nominal.rail_len / 2.0
 
     def effective(self) -> dict[str, float]:
         """Nominal times correction, plus the directly-fitted quantities."""

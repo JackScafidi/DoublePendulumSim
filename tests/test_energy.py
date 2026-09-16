@@ -13,12 +13,24 @@ import numpy as np
 import pytest
 
 from dpc.model import ModelConfig, build
-from dpc.params import Friction, Params
+from dpc.params import Friction, Nominal, Params
 from dpc.simulate import simulate
 
 M = build(ModelConfig())
-IDEAL = Params()
-DAMPED = Params(fric=Friction(b_cart=0.5, b1=0.02, b2=0.02))
+
+LONG_RAIL = Nominal(rail_len=1e3)
+"""A rail no case here can reach the end of.
+
+The end stops are a constraint on the state rather than a term in the equations
+of motion, and hitting one is inelastic: it removes energy on purpose. Cases
+that send the cart travelling -- a tilted rail, or a start with the cart
+already moving -- would otherwise stop against a wall, and this file is about
+the derivation, not about the wall. tests/test_rail.py owns the stops.
+"""
+
+IDEAL = Params(nominal=LONG_RAIL)
+DAMPED = Params(nominal=LONG_RAIL,
+                fric=Friction(b_cart=0.5, b1=0.02, b2=0.02))
 
 
 def _energy_series(p, s0, dt=5e-4, t_end=6.0):
@@ -55,7 +67,7 @@ def test_friction_removes_energy_monotonically():
 
 def test_a_tilted_rail_still_conserves_energy():
     """Tilt changes where the energy sits, not whether it is conserved."""
-    p = Params(phi=0.26)
+    p = Params(nominal=LONG_RAIL, phi=0.26)
     e = _energy_series(p, np.array([0.0, 2.0, 2.2, 0.0, 0.0, 0.0]), t_end=3.0)
     drift = abs(e - e[0]).max() / abs(e[0])
     assert drift < 1e-6, f"relative energy drift {drift:.2e}"

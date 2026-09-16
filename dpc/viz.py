@@ -20,6 +20,9 @@ def plot_trajectory(tr: Trajectory, model: NumericModel, p: Params,
     Energy drift gets its own panel rather than being folded into a summary
     number: its shape distinguishes integrator truncation error, which
     oscillates and stays bounded, from a modelling fault, which grows.
+
+    The end stops are drawn on the position panel the way a_max and the torque
+    budget are drawn on theirs: a number against the limit that bounds it.
     """
     fig, ax = plt.subplots(4, 1, figsize=(9, 10), sharex=True)
 
@@ -33,6 +36,8 @@ def plot_trajectory(tr: Trajectory, model: NumericModel, p: Params,
 
     ax[1].plot(tr.t, tr.s[:, 0])
     ax[1].axhline(0.0, lw=0.5, color="k")
+    for lim in (p.x_lim, -p.x_lim):
+        ax[1].axhline(lim, lw=0.5, ls=":", color="k")
     ax[1].set_ylabel("cart $x$ [m]")
 
     ax[2].plot(tr.t, tr.F)
@@ -62,7 +67,8 @@ def plot_run(r: Run, p: Params, title: str | None = None):
 
     True cart position is drawn against the step count so the two can be seen
     to agree -- or, once slip is enabled, to come apart. On hardware only the
-    dashed line exists.
+    dashed line exists. Both are drawn against the end stops, because a cart
+    position means nothing without the length of rail it has to move in.
     """
     fig, ax = plt.subplots(4, 1, figsize=(9, 10), sharex=True)
 
@@ -77,6 +83,8 @@ def plot_run(r: Run, p: Params, title: str | None = None):
     ax[1].plot(r.t, r.s[:, 0], label="true")
     ax[1].plot(r.t, r.x_count, ls="--", label="step count")
     ax[1].axhline(0.0, lw=0.5, color="k")
+    for lim in (p.x_lim, -p.x_lim):
+        ax[1].axhline(lim, lw=0.5, ls=":", color="k")
     ax[1].set_ylabel("cart $x$ [m]")
     ax[1].legend(loc="upper right")
 

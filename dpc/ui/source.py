@@ -21,6 +21,7 @@ from dpc.model import NumericModel
 from dpc.motor import MotorState
 from dpc.motor import step as motor_step
 from dpc.params import Params
+from dpc.rail import impact, side
 from dpc.scenarios import Scenario
 from dpc.sensors import measure
 from dpc.simulate import rk4_step
@@ -77,6 +78,11 @@ class SimSource:
         """Control ticks lost to step slip so far in this run."""
         return self._motor.n_slip
 
+    @property
+    def n_pin(self) -> int:
+        """Control ticks spent against an end stop so far in this run."""
+        return self._motor.n_pin
+
     def start(self, controller, scenario: Scenario) -> None:
         self._controller = controller
         self._scenario = scenario
@@ -85,7 +91,9 @@ class SimSource:
     def _restart(self) -> None:
         assert self._scenario is not None and self._controller is not None
         self._s = np.array(self._scenario.s0, dtype=float)
-        self._motor = MotorState()
+        # Seeded from the scenario for the same reason run() seeds it: a
+        # scenario that starts off centre must not open with a counting error.
+        self._motor = MotorState(x_count=float(self._s[0]))
         self._i = 0
         self.done = False
         self._controller.reset(self.params)
@@ -139,6 +147,11 @@ class SimSource:
             s_next = self._s
             for _ in range(sub):
                 s_next = rk4_step(f, s_next, mo.a_del, dt)
+                # The same wall simulate.run() enforces, applied at the same
+                # place: after every substep, so the cart is never drawn or
+                # logged anywhere the rail does not reach.
+                if side(float(s_next[0]), p) != 0:
+                    s_next = impact(self.model, s_next, p)
 
             self._s = s_next
             self._motor = mo.state
@@ -150,7 +163,7 @@ class SimSource:
                 x_count=m.x_count,
                 a_cmd=cmd.a_cmd, a_del=mo.a_del,
                 F_req=mo.F_req, tau=mo.tau,
-                mode=cmd.mode, slipped=mo.slipped,
+                mode=cmd.mode, slipped=mo.slipped, pinned=mo.pinned,
                 truth=s_next.copy(),
             ))
 
