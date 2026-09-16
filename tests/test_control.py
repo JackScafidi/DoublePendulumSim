@@ -1,10 +1,12 @@
 import inspect
+from dataclasses import FrozenInstanceError
 
 import numpy as np
 import pytest
 
 from dpc.control import ControlOutput
-from dpc.controllers.basic import ConstantController, ZeroController
+from dpc.controllers.constant import ConstantController
+from dpc.controllers.zero import ZeroController
 from dpc.params import Params
 from dpc.sensors import Measurement
 
@@ -38,8 +40,10 @@ def test_output_carries_a_mode():
 
 def test_output_is_frozen():
     out = ControlOutput(a_cmd=1.0)
-    with pytest.raises(Exception):
-        out.a_cmd = 2.0
+    with pytest.raises(FrozenInstanceError):
+        # The rejected assignment is what is under test, so the type
+        # checker's objection to it is exactly the behaviour asserted.
+        out.a_cmd = 2.0  # type: ignore[misc]
 
 
 def test_reset_takes_no_state():

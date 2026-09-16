@@ -19,17 +19,17 @@ def qapp():
     return QApplication.instance() or QApplication([])
 
 
-def _event(kind, x, y):
+def _event(kind, x: float, y: float):
     return QMouseEvent(kind, QPointF(x, y), QPointF(x, y), QPointF(x, y),
                        Qt.MouseButton.LeftButton, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier,
                        Qt.MouseEventSource.MouseEventNotSynthesized)
 
 
-def _press(w, x=5, y=5):
+def _press(w, x: float = 5.0, y: float = 5.0):
     w.mousePressEvent(_event(QEvent.Type.MouseButtonPress, x, y))
 
 
-def _release(w, x=5, y=5):
+def _release(w, x: float = 5.0, y: float = 5.0):
     w.mouseReleaseEvent(_event(QEvent.Type.MouseButtonRelease, x, y))
 
 

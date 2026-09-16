@@ -1,6 +1,8 @@
 """Each stage of the motor model gets its own test, and each test neutralises
 the other stages, so a failure names one mechanism rather than the chain."""
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
@@ -13,12 +15,15 @@ TS = 1e-3
 REST = np.zeros(6)
 
 
-def _p(**drive):
-    """A parameter set with every limit relaxed except the ones named."""
-    base = dict(a_max=1e6, v_max=1e6, jerk_max=1e12, tau_lag=0.0,
+RELAXED = Drive(a_max=1e6, v_max=1e6, jerk_max=1e12, tau_lag=0.0,
                 slip_enable=False)
-    base.update(drive)
-    return Params(drive=Drive(**base), ctrl=Control(ts=TS))
+"""Every limit wound out of the way. A test reinstates only the one it is
+about, so a failure names one stage of the motor model."""
+
+
+def _p(**drive) -> Params:
+    """A parameter set with every limit relaxed except the ones named."""
+    return Params(drive=replace(RELAXED, **drive), ctrl=Control(ts=TS))
 
 
 def test_zero_command_from_rest_changes_nothing():

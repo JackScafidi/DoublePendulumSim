@@ -1,4 +1,5 @@
 import dataclasses
+from dataclasses import FrozenInstanceError
 
 import numpy as np
 import pytest
@@ -45,5 +46,7 @@ def test_reported_position_is_quantised_to_whole_microsteps():
 
 def test_measurement_is_frozen():
     m = measure(0.0, S, MotorState(), 1e-3, P)
-    with pytest.raises(Exception):
-        m.th1 = 0.0
+    with pytest.raises(FrozenInstanceError):
+        # The rejected assignment is what is under test, so the type
+        # checker's objection to it is exactly the behaviour asserted.
+        m.th1 = 0.0  # type: ignore[misc]

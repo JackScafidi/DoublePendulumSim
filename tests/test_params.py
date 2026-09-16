@@ -1,4 +1,5 @@
 import math
+from dataclasses import FrozenInstanceError
 
 import pytest
 
@@ -41,8 +42,10 @@ def test_vector_matches_the_canonical_ordering():
 
 def test_params_are_frozen():
     p = Params()
-    with pytest.raises(Exception):
-        p.phi = 0.5
+    with pytest.raises(FrozenInstanceError):
+        # The rejected assignment is what is under test, so the type
+        # checker's objection to it is exactly the behaviour asserted.
+        p.phi = 0.5  # type: ignore[misc]
 
 
 def test_nominals_are_physically_plausible():
