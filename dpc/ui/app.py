@@ -8,6 +8,7 @@ tick() is deliberately callable without the timer, so a test can drive the clock
 itself instead of sleeping.
 """
 
+import math
 import sys
 import time
 
@@ -22,7 +23,8 @@ from dpc.scenarios import by_key
 from dpc.ui import theme as T
 from dpc.ui.panels.animation import AnimationPanel
 from dpc.ui.panels.constants import ConstantsPanel
-from dpc.ui.panels.controls import SelectorPanel, TransportPanel
+from dpc.ui.panels.controls import (BEHIND, DONE, FAILED, SelectorPanel,
+                                    TransportPanel)
 from dpc.ui.panels.plots import PlotPanel
 from dpc.ui.panels.card import card
 from dpc.ui.sample import Command, SampleBuffer
@@ -58,6 +60,7 @@ class Dashboard(QMainWindow):
         and shadowing it with a float means any Qt code that asks this window
         for its cursor gets a number instead."""
         self.speed = 1.0
+        self.t_end = 1.0
         self.playing = True
         self._t_wall = time.perf_counter()
         self._controller_values: dict[str, float] = {}
@@ -88,11 +91,20 @@ class Dashboard(QMainWindow):
         self.selectors.run_pressed.connect(self.run)
         self.selectors.controller_changed.connect(self._on_controller_changed)
         self.selectors.scenario.currentIndexChanged.connect(
-            lambda: self.constants.set_scenario(by_key(self.selectors.scenario_key)))
+            lambda: self.constants.set_scenario(
+                by_key(self.selectors.scenario_key)))
         left.addWidget(self.selectors)
 
         self.animation = AnimationPanel()
-        left.addWidget(card("Mechanism", self.animation), 5)
+        # The drawn mechanism is roughly as tall as it is wide -- a 0.5 m rail
+        # under links that reach 0.4 m below it -- while the well it sits in
+        # is five times wider than it is tall. So the VERTICAL fit sets the
+        # scale of everything on the canvas, and every pixel of height here is
+        # the difference between a legible mechanism and a thin band in the
+        # middle of an empty well. The plots keep the larger share because
+        # there are four of them, but not by as much as they used to.
+        self.mechanism = card("Mechanism", self.animation, unit="")
+        left.addWidget(self.mechanism, 5)
 
         self.transport = TransportPanel()
         self.transport.play_toggled.connect(self._on_play)
@@ -101,7 +113,7 @@ class Dashboard(QMainWindow):
         left.addWidget(card(None, self.transport, well=False))
 
         self.plots = PlotPanel()
-        left.addWidget(self.plots, 6)
+        left.addWidget(self.plots, 7)
 
         outer.addLayout(left, 1)
 
@@ -149,7 +161,7 @@ class Dashboard(QMainWindow):
     def run(self) -> None:
         entry = self.selectors.controller_entry
         if entry.error:
-            self.transport.set_status("controller failed to load")
+            self.transport.set_status(FAILED)
             return
         scenario = by_key(self.selectors.scenario_key)
 
@@ -161,6 +173,7 @@ class Dashboard(QMainWindow):
         self.source.start(build(entry, self._controller_values), scenario)
 
         self.play_head = 0.0
+        self.t_end = scenario.t_end
         self._t_wall = time.perf_counter()
         self.transport.set_range(scenario.t_end)
         self.transport.set_status("")
@@ -181,14 +194,14 @@ class Dashboard(QMainWindow):
 
         if self.playing and not self.source.done:
             self.play_head = min(self.play_head + dt * self.speed,
-                              self.buffer.t_head + 1.0)
+                                 self.buffer.t_head + 1.0)
             got = self.source.poll(self.play_head)
             for s in got:
                 self.buffer.append(s)
             if len(got) >= self.source.max_ticks_per_poll:
-                self.transport.set_status("falling behind")
+                self.transport.set_status(BEHIND)
             elif self.source.done:
-                self.transport.set_status("done")
+                self.transport.set_status(DONE)
 
         # Never draw ahead of what exists: the cursor may have run past the
         # head when the solver could not keep up.
@@ -198,13 +211,32 @@ class Dashboard(QMainWindow):
     def _render(self) -> None:
         self.transport.set_cursor(self.play_head)
         self.animation.show_sample(self.buffer.at(self.play_head), self.params)
+        self._render_header()
         self.plots.redraw(self.buffer.window(
             max(0.0, self.play_head - WINDOW_S), self.play_head))
         self._render_live()
 
-    def _render_live(self) -> None:
-        import math
+    def _render_header(self) -> None:
+        """The mechanism's own numbers, in the mechanism's own header.
 
+        The clock sits beside the thing it is timing rather than in the
+        transport row, and the angles sit beside the drawing rather than
+        floating over the top of it.
+        """
+        clock = (f"t {self.play_head:6.3f} / {self.t_end:.3f} s"
+                 f"   ·   {self.speed:g}×")
+        readout = self.animation.readout_text()
+        self.mechanism.head_right.set_full(
+            f"{readout}      {clock}" if readout else clock)
+
+    def _render_live(self) -> None:
+        """Every field is padded to a fixed width.
+
+        The widgets are built once and only their text changes, so a value
+        whose string gets shorter would shrink its own label and shuffle the
+        column sideways at 50 Hz. Mono digits plus a fixed field width is what
+        makes a live column readable while it moves.
+        """
         s = self.buffer.at(self.play_head)
         if s is None:
             self.constants.set_live([("—", "no run yet", "")])
@@ -212,14 +244,17 @@ class Dashboard(QMainWindow):
         x_true = float(s.truth[0]) if s.truth is not None else float("nan")
         err = (s.x_count - x_true) * 1e3
         self.constants.set_live([
-            ("θ₁ / θ₂", f"{math.degrees(s.th1):.1f} / {math.degrees(s.th2):.1f}", "deg"),
-            ("cart x", f"{x_true:.4f}", "m"),
-            ("step count", f"{s.x_count:.4f}", "m"),
-            ("counting error", f"{err:+.2f}", "mm"),
-            ("a cmd / del", f"{s.a_cmd:.2f} / {s.a_del:.2f}", "m/s²"),
-            ("τ motor", f"{s.tau * 1e3:.1f}", "mN·m"),
+            ("θ₁ / θ₂",
+             f"{math.degrees(s.th1):6.1f} / {math.degrees(s.th2):6.1f}",
+             "deg"),
+            ("cart x", f"{x_true:7.4f}", "m"),
+            ("step count", f"{s.x_count:7.4f}", "m"),
+            ("counting error", f"{err:+7.2f}", "mm"),
+            ("a cmd / del", f"{s.a_cmd:6.2f} / {s.a_del:6.2f}", "m/s²"),
+            ("τ motor", f"{s.tau * 1e3:7.1f}", "mN·m"),
             ("mode", s.mode, ""),
-            ("slipped", str(self.source.n_slip), "ticks"),
+            ("slipped", f"{self.source.n_slip:6d}", "ticks"),
+            ("pinned", f"{self.source.n_pin:6d}", "ticks"),
         ])
 
 

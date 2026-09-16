@@ -24,6 +24,20 @@ from PySide6.QtWidgets import QFrame
 from dpc.ui import theme as T
 
 
+def shadow_pad(offset: int) -> int:
+    """How much transparent border every pixmap below carries, per side.
+
+    The blur is twice the offset and the shape is shifted by the offset on top
+    of it, plus a little slack -- so the shape sits at (pad, pad) inside the
+    pixmap and a caller draws the pixmap this far BEFORE the shape it belongs
+    to, in both directions. Getting it from here rather than open-coding
+    `3 * offset + 2` is what stops a shade built at one offset being drawn at
+    another one's inset, which composites it a few pixels down and right of
+    the fill it is meant to shade.
+    """
+    return offset * 3 + 2
+
+
 def _box_blur(a: np.ndarray, r: int) -> np.ndarray:
     """Three box passes, which is close enough to a Gaussian for a shadow and
     far cheaper. Separable, so each pass is two 1-D convolutions."""
@@ -98,7 +112,7 @@ def raised_pixmap(w: int, h: int, offset: int, radius: float,
     where the offset is a big fraction of the element.
     """
     blur = offset * 2
-    pad = blur + offset + 2
+    pad = shadow_pad(offset)
     shape = _rounded_mask(w, h, pad, radius)
     mask = _blur_cache(w, h, pad, radius, blur)
     outside = 1.0 - shape
@@ -115,7 +129,7 @@ def inset_pixmap(w: int, h: int, offset: int, radius: float) -> QPixmap:
     """The two inner shadows: dark along the top-left interior, light along the
     bottom-right, so the surface reads as pressed into the page."""
     blur = offset * 2
-    pad = blur + offset + 2
+    pad = shadow_pad(offset)
     shape = _rounded_mask(w, h, pad, radius)
     outside = _box_blur(1.0 - shape, blur)
 
@@ -142,7 +156,7 @@ def inner_shade_pixmap(w: int, h: int, offset: int, radius: float,
     different material and composites over the label, wrecking its contrast.
     """
     blur = offset * 2
-    pad = blur + offset + 2
+    pad = shadow_pad(offset)
     shape = _rounded_mask(w, h, pad, radius)
     outside = _box_blur(1.0 - shape, blur)
     inner = np.roll(outside, (-offset, -offset), axis=(0, 1)) * shape
@@ -178,7 +192,7 @@ class NeumorphicFrame(QFrame):
         self.offset = offset
         self.radius = T.RADIUS_PANEL if radius is None else radius
         self.fill = fill or (T.SURFACE_SUNKEN if inset else T.SURFACE)
-        self.pad = offset * 3 + 2
+        self.pad = shadow_pad(offset)
         """How far the shadow reaches: the offset plus a blur of twice it,
         with a little slack. A raised frame reserves this as margin."""
         self._pixmap: QPixmap | None = None
