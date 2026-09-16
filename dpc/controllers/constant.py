@@ -1,8 +1,9 @@
-"""The two controllers that exist to prove the loop closes.
+"""The controller that walks the motor through its limits.
 
-Neither is a control law. ZeroController lets the whole chain run without
-perturbing the physics; ConstantController walks the motor model through its
-jerk limit, its saturation and its velocity ceiling, in that order.
+Not a control law either. A fixed acceleration command is the shortest input
+that drives the step generator through its jerk limit, then its saturation,
+then its velocity ceiling, in that order -- so the motor model can be read off
+one trace.
 """
 
 import math
@@ -11,24 +12,6 @@ from dpc.control import ControlOutput
 from dpc.controllers.registry import ParamSpec, register
 from dpc.params import Params
 from dpc.sensors import Measurement
-
-
-@register("Zero command")
-class ZeroController:
-    """Commands nothing, ever.
-
-    Lets the whole chain -- measurement, controller, motor, plant -- run without
-    perturbing the physics, which is how the plumbing gets tested separately
-    from any control law.
-    """
-
-    PARAMS: tuple[ParamSpec, ...] = ()
-
-    def reset(self, p: Params) -> None:
-        pass
-
-    def update(self, m: Measurement) -> ControlOutput:
-        return ControlOutput(a_cmd=0.0, mode="idle")
 
 
 @register("Constant acceleration")

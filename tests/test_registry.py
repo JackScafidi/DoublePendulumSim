@@ -53,9 +53,9 @@ def test_a_broken_module_is_listed_disabled_rather_than_raising(tmp_path, monkey
     monkeypatch.setattr(pkg, "__path__", list(pkg.__path__) + [str(tmp_path)])
 
     entries = discover()
-    bad = [e for e in entries if e.error]
-    assert any("half-written" in e.error for e in bad)
-    assert all(e.cls is None for e in bad)
+    messages = [e.error for e in entries if e.error is not None]
+    assert any("half-written" in msg for msg in messages)
+    assert all(e.cls is None for e in entries if e.error is not None)
     assert {"zero", "constant"} <= {e.key for e in entries}
 
 

@@ -273,7 +273,11 @@ class NumericModel:
         # lambdify needs plain symbols, not functions of time.
         pq = sp.symbols("q0 q1 q2", real=True)
         pv = sp.symbols("v0 v1 v2", real=True)
-        sub = dict(zip(q, pq)) | dict(zip(qd, pv))
+        # subs() takes a Mapping whose key type is invariant, so the pairs are
+        # collected under the type it declares rather than under their own.
+        sub: dict[sp.Basic | complex, sp.Basic | complex] = {}
+        sub.update(zip(q, pq))
+        sub.update(zip(qd, pv))
 
         def plain(expr):
             return sp.Matrix(expr).subs(sub)

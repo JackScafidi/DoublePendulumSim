@@ -10,6 +10,17 @@ def _s(t, th1=0.0, a_del=0.0, truth=True):
                   truth=np.zeros(6) if truth else None)
 
 
+def _at(b: SampleBuffer, t: float) -> Sample:
+    """The sample in force at t, asserted to exist.
+
+    at() returns None before the first sample, which has its own test; this
+    keeps the tests about content from having to restate that.
+    """
+    s = b.at(t)
+    assert s is not None
+    return s
+
+
 def test_empty_buffer():
     b = SampleBuffer()
     assert len(b) == 0
@@ -59,9 +70,9 @@ def test_at_returns_the_sample_in_force():
     b = SampleBuffer()
     for i in range(10):
         b.append(_s(i * 0.1, th1=float(i)))
-    assert b.at(0.55).th1 == pytest.approx(5.0)
-    assert b.at(0.0).th1 == pytest.approx(0.0)
-    assert b.at(99.0).th1 == pytest.approx(9.0)
+    assert _at(b, 0.55).th1 == pytest.approx(5.0)
+    assert _at(b, 0.0).th1 == pytest.approx(0.0)
+    assert _at(b, 99.0).th1 == pytest.approx(9.0)
     assert b.at(-1.0) is None
 
 
@@ -69,7 +80,7 @@ def test_absent_truth_survives_the_round_trip():
     """What hardware will deliver: measured signals, no true state."""
     b = SampleBuffer()
     b.append(_s(0.0, truth=False))
-    assert b.at(0.0).truth is None
+    assert _at(b, 0.0).truth is None
 
 
 def test_clear_resets():

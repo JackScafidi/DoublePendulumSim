@@ -7,6 +7,24 @@ from dpc.dynamics import (accel, deriv_accel, link_accel, motor_torque,
 from dpc.model import ModelConfig, S, build, derive, th1, th2
 from dpc.params import Friction, Nominal, Params
 
+Subs = dict[sp.Basic | complex, sp.Basic | complex]
+"""What subs() accepts as a mapping. Its key type is invariant, so a dict of
+concrete symbol types is not assignable to it; the annotation is what makes a
+substitution dict match."""
+
+
+def _el(mat: sp.Matrix, i: int) -> sp.Expr:
+    """One element of a column matrix, narrowed to an expression.
+
+    Indexing a Matrix can yield either an element or a submatrix, so the
+    declared return type is a union. The assert is a real check -- an index
+    that came back as a slice would fail here rather than inside the assertion
+    under test.
+    """
+    e = mat[i]
+    assert isinstance(e, sp.Expr)
+    return e
+
 
 def test_mass_matrix_is_symmetric():
     m = derive(ModelConfig())
@@ -30,7 +48,7 @@ def test_rotor_has_no_weight():
 
 def test_gravity_vanishes_for_the_cart_on_a_level_rail():
     m = derive(ModelConfig())
-    assert sp.simplify(m.G_sym[0].subs(S["phi"], 0)) == 0
+    assert sp.simplify(_el(m.G_sym, 0).subs(S["phi"], 0)) == 0
 
 
 def test_gravity_on_a_tilted_rail_uses_real_mass_only():
@@ -43,9 +61,9 @@ def test_gravity_on_a_tilted_rail_uses_real_mass_only():
 
 def test_upright_is_an_equilibrium():
     m = derive(ModelConfig())
-    sub = {th1: 0, th2: 0, S["phi"]: 0}
-    assert sp.simplify(m.G_sym[1].subs(sub)) == 0
-    assert sp.simplify(m.G_sym[2].subs(sub)) == 0
+    sub: Subs = {th1: 0, th2: 0, S["phi"]: 0}
+    assert sp.simplify(_el(m.G_sym, 1).subs(sub)) == 0
+    assert sp.simplify(_el(m.G_sym, 2).subs(sub)) == 0
 
 
 def test_hanging_gravity_torque_has_restoring_sign():
@@ -56,17 +74,20 @@ def test_hanging_gravity_torque_has_restoring_sign():
     acceleration is -M^-1 G. Driving theta upward therefore needs G[1] < 0.
     """
     m = derive(ModelConfig())
-    sub = {th1: sp.pi - sp.Rational(1, 10), th2: sp.pi - sp.Rational(1, 10),
-           S["phi"]: 0, S["m1"]: 1, S["m2"]: 1, S["lc1"]: 1, S["lc2"]: 1,
-           S["l1"]: 1, S["g"]: 1}
-    assert float(m.G_sym[1].subs(sub).evalf()) < 0
+    near_hanging = sp.pi - sp.Rational(1, 10)
+    sub: Subs = {th1: near_hanging, th2: near_hanging,
+                 S["phi"]: 0, S["m1"]: 1, S["m2"]: 1, S["lc1"]: 1, S["lc2"]: 1,
+                 S["l1"]: 1, S["g"]: 1}
+    torque = _el(m.G_sym, 1).subs(sub)
+    assert isinstance(torque, sp.Expr)
+    assert float(torque.evalf()) < 0
 
 
 def test_elbow_friction_is_equal_and_opposite():
     """Rows 1 and 2 must cancel the elbow term exactly: the torque on link 2
     has an equal and opposite reaction on link 1."""
     m = derive(ModelConfig())
-    pair = sp.simplify(m.Ffric_sym[1] + m.Ffric_sym[2])
+    pair = sp.simplify(_el(m.Ffric_sym, 1) + _el(m.Ffric_sym, 2))
     assert S["b2"] not in pair.free_symbols
     assert S["c2"] not in pair.free_symbols
 
@@ -75,8 +96,8 @@ def test_elbow_friction_vanishes_when_the_links_move_together():
     """theta2dot == theta1dot means the elbow is not bending, so no friction."""
     m = derive(ModelConfig())
     from dpc.model import qd
-    same = {qd[2]: qd[1]}
-    assert S["b2"] not in sp.simplify(m.Ffric_sym[2].subs(same)).free_symbols
+    same: Subs = {qd[2]: qd[1]}
+    assert S["b2"] not in sp.simplify(_el(m.Ffric_sym, 2).subs(same)).free_symbols
 
 
 def test_friction_vanishes_when_all_coefficients_are_zero():
@@ -94,7 +115,7 @@ def test_viscous_only_config_drops_the_coulomb_terms():
 
 def test_input_matrix_drives_the_cart_only():
     m = derive(ModelConfig())
-    assert list(m.B_sym) == [1, 0, 0]
+    assert [_el(m.B_sym, i) for i in range(3)] == [1, 0, 0]
 
 
 def test_coriolis_terms_are_quadratic_in_velocity():

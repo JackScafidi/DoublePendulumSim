@@ -6,7 +6,7 @@ import numpy as np  # noqa: E402
 
 from dpc.model import ModelConfig, build  # noqa: E402
 from dpc.params import Params  # noqa: E402
-from dpc.controllers.basic import ConstantController  # noqa: E402
+from dpc.controllers.constant import ConstantController  # noqa: E402
 from dpc.simulate import run, simulate  # noqa: E402
 from dpc.viz import plot_run, plot_trajectory  # noqa: E402
 
@@ -60,13 +60,17 @@ def test_position_panel_draws_truth_against_the_step_count():
     """Two lines, because the difference between them is the point."""
     ax = plot_run(_run_closed(), P).axes[1]
     assert len(ax.get_lines()) >= 2
-    assert {t.get_text() for t in ax.get_legend().get_texts()} == {"true", "step count"}
+    legend = ax.get_legend()
+    assert legend is not None
+    assert {t.get_text() for t in legend.get_texts()} == {"true", "step count"}
 
 
 def test_latex_labels_survive_as_backslash_escapes():
     r"""A stray unescaped backslash turns \theta into a tab and matplotlib
     renders the panel legend as nonsense rather than failing."""
     fig = plot_run(_run_closed(), P)
-    names = {t.get_text() for t in fig.axes[0].get_legend().get_texts()}
+    legend = fig.axes[0].get_legend()
+    assert legend is not None
+    names = {t.get_text() for t in legend.get_texts()}
     assert names == {r"$\theta_1$", r"$\theta_2$"}
     assert r"$\tau_{motor}$" in fig.axes[3].get_ylabel()

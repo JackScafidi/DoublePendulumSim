@@ -1,3 +1,5 @@
+from dataclasses import FrozenInstanceError
+
 import numpy as np
 import pytest
 
@@ -35,5 +37,7 @@ def test_upright_is_the_unstable_equilibrium():
 
 
 def test_scenarios_are_frozen():
-    with pytest.raises(Exception):
-        SCENARIOS[0].t_end = 1.0
+    with pytest.raises(FrozenInstanceError):
+        # The rejected assignment is what is under test, so the type
+        # checker's objection to it is exactly the behaviour asserted.
+        SCENARIOS[0].t_end = 1.0  # type: ignore[misc]
