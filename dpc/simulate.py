@@ -21,6 +21,7 @@ from dpc.model import NumericModel
 from dpc.motor import MotorState
 from dpc.motor import step as motor_step
 from dpc.params import Params
+from dpc.rail import impact, side
 from dpc.sensors import measure
 
 ForceFn = Callable[[float, np.ndarray], float]
@@ -66,6 +67,10 @@ def simulate(model: NumericModel, s0: np.ndarray, force: ForceFn,
 
     The force is sampled once per step and held, which is exactly what a
     controller running at 1/dt does. `s0` is copied, never modified.
+
+    The end stops are applied after every step, so the force-driven plant sees
+    the same wall the stepper-driven one does. There is one rail, and which
+    drive mode is being simulated is not allowed to change how long it is.
     """
     n = int(round(t_end / dt))
     t = np.linspace(0.0, n * dt, n + 1)
@@ -79,6 +84,8 @@ def simulate(model: NumericModel, s0: np.ndarray, force: ForceFn,
     for i in range(n):
         F[i] = force(t[i], s[i])
         s[i + 1] = rk4_step(f, s[i], F[i], dt)
+        if side(float(s[i + 1, 0]), p) != 0:
+            s[i + 1] = impact(model, s[i + 1], p)
 
     F[n] = force(t[n], s[n])
     return Trajectory(t=t, s=s, F=F)
@@ -130,6 +137,9 @@ class Run:
     slipped: np.ndarray
     """(n,) bool."""
 
+    pinned: np.ndarray
+    """(n,) bool. Ticks on which the step counter sat against an end stop."""
+
 
 def run(model: NumericModel, s0: np.ndarray, controller: Controller,
         p: Params, t_end: float, ts: float | None = None,
@@ -145,6 +155,12 @@ def run(model: NumericModel, s0: np.ndarray, controller: Controller,
     across the substeps. That is faithful rather than simplified: the step-rate
     timer is reloaded once per control tick, so the jerk limiter, the
     saturation, the ceiling and the lag are all genuinely discrete at ts.
+
+    The end stops are applied after every substep rather than once per tick:
+    this loop is the single authority on where the cart is, and a cart that
+    left the rail between substeps was never on it. The motor keeps its own
+    copy of the wall for the counter, and the force-driven simulate() above
+    applies the same one, so both drive modes see the same rail.
     """
     ts = p.ctrl.ts if ts is None else ts
     substeps = p.ctrl.substeps if substeps is None else substeps
@@ -161,10 +177,14 @@ def run(model: NumericModel, s0: np.ndarray, controller: Controller,
     tau = np.empty(n + 1)
     x_count = np.empty(n + 1)
     slipped = np.empty(n + 1, dtype=bool)
+    pinned = np.empty(n + 1, dtype=bool)
     mode: list[str] = []
 
     s[0] = np.asarray(s0, dtype=float)
-    st = MotorState()
+    # The counter is seeded from the initial state, not from zero. It carries
+    # its own copy of the rail, and the two walls are the same wall only if the
+    # counter and the plant agree about where the cart started.
+    st = MotorState(x_count=float(s[0, 0]))
     controller.reset(p)
 
     def f(state: np.ndarray, u: float) -> np.ndarray:
@@ -182,6 +202,7 @@ def run(model: NumericModel, s0: np.ndarray, controller: Controller,
         tau[i] = mo.tau
         x_count[i] = m.x_count
         slipped[i] = mo.slipped
+        pinned[i] = mo.pinned
         mode.append(out.mode)
 
         # The final tick is measured and commanded but never applied, matching
@@ -193,6 +214,9 @@ def run(model: NumericModel, s0: np.ndarray, controller: Controller,
         s[i + 1] = s[i]
         for _ in range(substeps):
             s[i + 1] = rk4_step(f, s[i + 1], mo.a_del, dt)
+            if side(float(s[i + 1, 0]), p) != 0:
+                s[i + 1] = impact(model, s[i + 1], p)
 
     return Run(t=t, s=s, meas=meas, a_cmd=a_cmd, a_del=a_del, F_req=F_req,
-               tau=tau, x_count=x_count, mode=mode, slipped=slipped)
+               tau=tau, x_count=x_count, mode=mode, slipped=slipped,
+               pinned=pinned)

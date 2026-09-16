@@ -6,7 +6,7 @@ from dpc.ui.sample import Command, Sample, SampleBuffer
 
 def _s(t, th1=0.0, a_del=0.0, truth=True):
     return Sample(t=t, th1=th1, th2=0.0, x_count=0.0, a_cmd=0.0, a_del=a_del,
-                  F_req=0.0, tau=0.0, mode="idle", slipped=False,
+                  F_req=0.0, tau=0.0, mode="idle", slipped=False, pinned=False,
                   truth=np.zeros(6) if truth else None)
 
 
