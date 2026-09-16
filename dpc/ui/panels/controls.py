@@ -1,21 +1,38 @@
 """The two control strips: what to run, and how to watch it.
 
 Both are pure widgets -- they emit what the user did and hold no simulation
-state. The window owns the clock.
+state. The window owns the clock, and now draws it too: the run time belongs
+beside the thing it is timing, in the Mechanism card header, rather than as two
+more labels in a transport row that was already carrying four.
+
+What is left here is one accent mass. Run is the primary fill in the view, so
+play is a raised icon button with the interactive border, the scrub groove is
+thin and part-strength, and the three speeds are one segmented control rather
+than three separately extruded pills.
 """
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Signal
 from PySide6.QtGui import QStandardItemModel
-from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QWidget
 
 from dpc.controllers.registry import Entry
 from dpc.scenarios import SCENARIOS
 from dpc.ui import theme as T
-from dpc.ui.widgets import NeumorphicButton, NeumorphicSlider
+from dpc.ui.widgets import (FlatCombo, IconButton, NeumorphicButton,
+                            NeumorphicSlider, SegmentedControl, StatusPill)
 
 SCRUB_STEPS = 1000
 """Slider resolution. Time is a float; the slider is an integer, so the scrub
 position is a fraction of the scenario rather than a tick index."""
+
+BEHIND = "falling behind"
+DONE = "done"
+FAILED = "controller failed to load"
+STATUSES = (BEHIND, DONE, FAILED)
+"""Every status the pill can ever carry, so it can size itself to the widest
+of them once and hold that width for the life of the window. BEHIND is the one
+worth a colour -- it is what the whole pull-model run design exists to report,
+so it is the one that gets the amber."""
 
 
 class SelectorPanel(QWidget):
@@ -29,7 +46,11 @@ class SelectorPanel(QWidget):
         self._entries = entries
 
         h = QHBoxLayout(self)
-        h.setContentsMargins(0, 0, 0, 0)
+        # The same inset a card gives its contents. This strip sits outside a
+        # card but directly above one, and an eye lines up a left edge before
+        # it reads anything: at zero margin the window title started about
+        # 22 px left of the MECHANISM label beneath it.
+        h.setContentsMargins(T.CARD_INSET, 0, T.CARD_INSET, 0)
         h.setSpacing(T.PAD_PANEL)
 
         title = QLabel("Double pendulum on a cart")
@@ -38,7 +59,7 @@ class SelectorPanel(QWidget):
         h.addWidget(title)
         h.addStretch(1)
 
-        self.controller = QComboBox()
+        self.controller = FlatCombo()
         for e in entries:
             self.controller.addItem(e.label, e.key)
         # A controller that failed to import is listed but cannot be chosen --
@@ -50,13 +71,14 @@ class SelectorPanel(QWidget):
                     model.item(i).setEnabled(False)
         self.controller.currentIndexChanged.connect(self.controller_changed)
 
-        self.scenario = QComboBox()
+        self.scenario = FlatCombo()
         for sc in SCENARIOS:
             self.scenario.addItem(sc.label, sc.key)
 
         # The one primary fill in the view: a coloured mass that extrudes from
         # the surface and carries its own inner shade.
-        self.run = NeumorphicButton("Run", filled=True, offset=4)
+        self.run = NeumorphicButton("Run", filled=True,
+                                    offset=T.SHADOW_PRIMARY)
         self.run.clicked.connect(self.run_pressed)
 
         for label, widget in (("Controller", self.controller),
@@ -86,7 +108,7 @@ class SelectorPanel(QWidget):
 
 
 class TransportPanel(QWidget):
-    """Play, scrub, speed, and an honest status line."""
+    """Play, scrub, speed, and an honest status."""
 
     play_toggled = Signal(bool)
     scrubbed = Signal(float)
@@ -103,7 +125,7 @@ class TransportPanel(QWidget):
         h.setContentsMargins(T.PAD_PANEL, 6, T.PAD_PANEL, 6)
         h.setSpacing(T.GAP_PANEL)
 
-        self.play = NeumorphicButton("❚❚", offset=3, padding=(10, 6))
+        self.play = IconButton("pause", offset=T.SHADOW_CTRL)
         self.play.setCheckable(True)
         self.play.setChecked(True)
         self.play.toggled.connect(self._on_play)
@@ -114,34 +136,25 @@ class TransportPanel(QWidget):
         self.slider.valueChanged.connect(self._on_scrub)
         h.addWidget(self.slider, 1)
 
-        self.clock = QLabel("0.000")
-        self.clock.setObjectName("value")
-        self.total = QLabel("/ 0.000 s")
-        self.total.setObjectName("unit")
-        h.addWidget(self.clock)
-        h.addWidget(self.total)
-
-        self._speed_buttons = []
-        for s in self.SPEEDS:
-            b = NeumorphicButton(f"{s:g}×", offset=3, padding=(9, 5))
-            b.setCheckable(True)
-            b.setChecked(s == 1.0)
-            b.clicked.connect(lambda _, v=s: self._on_speed(v))
-            self._speed_buttons.append((s, b))
-            h.addWidget(b)
-
-        self.status = QLabel("")
-        self.status.setObjectName("status")
+        # Fixed width, always in the layout. The slider is the only thing in
+        # this row that stretches, so anything beside it that changes width
+        # changes the length of the scrub groove -- and a groove that shortens
+        # by 172 px the moment a run falls behind jumps the thumb by that much
+        # mid-drag. Same rule as the play button's fixed square.
+        self.status = StatusPill(STATUSES)
         h.addWidget(self.status)
+        h.addSpacing(T.PAD_PANEL)
+
+        self.speeds = SegmentedControl(tuple(f"{s:g}×" for s in self.SPEEDS),
+                                       active=self.SPEEDS.index(1.0))
+        self.speeds.selected.connect(
+            lambda i: self.speed_changed.emit(self.SPEEDS[i]))
+        h.addWidget(self.speeds)
 
     def _on_play(self, on: bool) -> None:
-        self.play.setText("❚❚" if on else "▶")
+        self.play.glyph = "pause" if on else "play"
+        self.play.update()
         self.play_toggled.emit(on)
-
-    def _on_speed(self, value: float) -> None:
-        for s, b in self._speed_buttons:
-            b.setChecked(s == value)
-        self.speed_changed.emit(value)
 
     def _on_scrub(self, v: int) -> None:
         if not self._suppress:
@@ -149,15 +162,13 @@ class TransportPanel(QWidget):
 
     def set_range(self, t_end: float) -> None:
         self._t_end = max(t_end, 1e-9)
-        self.total.setText(f"/ {t_end:.3f} s")
 
     def set_cursor(self, t: float) -> None:
         """Moved by the clock, so the emitted-signal path is suppressed --
         otherwise every frame would look like a user scrub."""
-        self.clock.setText(f"{t:.3f}")
         self._suppress = True
         self.slider.setValue(int(round(t / self._t_end * SCRUB_STEPS)))
         self._suppress = False
 
     def set_status(self, text: str) -> None:
-        self.status.setText(text)
+        self.status.set_status(text, alert=text == BEHIND)
