@@ -9,6 +9,13 @@ It cannot balance the double pendulum and is not meant to: four gains act on
 two of six states, and upright has more than one unstable mode. It exists as
 the baseline the cascade and any later full-state law are measured against,
 and as the shortest path that puts a real control law through the whole chain.
+
+Defaults come from a survival sweep on 'nudged'. kp is low on purpose: the
+linear band is a_max/kp, so 11 stays linear out to 52 degrees where 50 gives
+up at 12, and staying linear is worth more here than loop bandwidth. A pole
+placement that ignores saturation asks for 50 and survives a third as long.
+kp's lower bound is the gravity floor -- below g the cart cannot out-accelerate
+the topple and no kd rescues it.
 """
 
 import math
@@ -26,9 +33,9 @@ TH1_TARGET = 0.0
 class PIDController:
 
     PARAMS = (
-        ParamSpec("kp", "proportional", "m/s²/rad",     50.0,  0.0, 200.0, step=1.0),
+        ParamSpec("kp", "proportional", "m/s²/rad",     11.0, 10.0, 200.0, step=1.0),
         ParamSpec("ki", "integral",     "m/s²/(rad·s)",  0.001, 0.0, 100.0, step=0.5),
-        ParamSpec("kd", "derivative",   "m/s²/(rad/s)",  3.5,   0.0,  20.0, step=0.1),
+        ParamSpec("kd", "derivative",   "m/s²/(rad/s)",  8.0,   0.0,  50.0, step=0.1),
         ParamSpec("kt", "anti-windup",  "1/s",           10.0,  0.0, 100.0, step=1.0),
     )
 

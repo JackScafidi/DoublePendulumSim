@@ -9,8 +9,8 @@ is the top of link 1.
 The usual cascade assumption does not hold. Link 2 falls at 8.58 rad/s against
 link 1's 8.00, so the outer loop's plant is the faster of the two and there is
 no timescale separation to lean on. That shows up as a narrow band of usable
-outer gain: kp2 = 1.0 multiplies survival on 'nudged' by 5.6x over the single
-loop, and kp2 = 2.0 gives all of it back.
+outer gain: kp2 = 1.0 takes survival on 'nudged' from 0.80 s to 1.53 s against
+a single loop swept just as hard, and kp2 = 2.0 gives all of it back.
 
 Defaults come from a survival sweep on 'nudged', not from pole placement. That
 sweep's own spread is 10-20% on a plant whose tail is chaotic, so they are the
@@ -38,9 +38,9 @@ class CascadeController:
         ParamSpec("ki2",  "outer integral",     "rad/(rad·s)", 0.0,  0.0,  20.0, step=0.1),
         ParamSpec("kd2",  "outer derivative",   "s",           0.1,  0.0,   5.0, step=0.01),
         ParamSpec("lean", "max lean",           "rad",         0.2,  0.0,   1.0, step=0.01),
-        ParamSpec("kp",   "proportional",       "m/s²/rad",   70.0,  0.0, 200.0, step=1.0),
+        ParamSpec("kp",   "proportional",       "m/s²/rad",   70.0, 10.0, 200.0, step=1.0),
         ParamSpec("ki",   "integral",           "m/s²/(rad·s)", 0.0, 0.0, 100.0, step=0.5),
-        ParamSpec("kd",   "derivative",         "m/s²/(rad/s)", 5.0, 0.0,  20.0, step=0.1),
+        ParamSpec("kd",   "derivative",         "m/s²/(rad/s)", 5.0, 0.0,  50.0, step=0.1),
         ParamSpec("kt",   "anti-windup",        "1/s",         10.0, 0.0, 100.0, step=1.0),
     )
 
