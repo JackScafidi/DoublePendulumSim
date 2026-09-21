@@ -66,7 +66,7 @@ def test_the_rail_is_drawn_at_exactly_the_rail_length(panel):
     panel._draw_rail(q, to_px, Params().x_lim)
     q.end()
 
-    assert seen == [-0.25, 0.25]
+    assert seen == [-Params().x_lim, Params().x_lim]
 
 
 def test_the_cart_is_drawn_at_its_real_length_until_it_would_vanish(qapp):
@@ -97,7 +97,8 @@ def test_every_threshold_entry_in_the_key_names_its_value(qapp):
     """"budget" alone is one more thing to go and look up."""
     plots = PlotPanel()
     plots.set_limits(Params())
-    assert plots.key_cart.labels[2].text() == "rail ±250 mm"
+    assert plots.key_cart.labels[2].text() == (
+        f"rail ±{Params().x_lim * 1000:.0f} mm")
     assert plots.key_accel.labels[2].text() == "a_max ±10"
     assert plots.key_torque.labels[1].text() == "budget ±200"
 

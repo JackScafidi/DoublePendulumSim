@@ -34,13 +34,13 @@ from dpc.sensors import Measurement
 class LQRController:
 
     PARAMS = (
-        ParamSpec("k_x",   "cart position",       "1/s²",           1.2389,  -50.0,  50.0, step=0.1),
-        ParamSpec("k_th1", "link 1 angle",        "m/s²/rad",    -106.1435, -500.0, 500.0, step=1.0),
-        ParamSpec("k_th2", "link 2 angle",        "m/s²/rad",     115.8923, -500.0, 500.0, step=1.0),
-        ParamSpec("k_dx",  "cart velocity",       "1/s",            2.3073,  -50.0,  50.0, step=0.1),
-        ParamSpec("k_w1",  "link 1 rate",         "m/s²/(rad/s)",  -3.4547,  -50.0,  50.0, step=0.1),
-        ParamSpec("k_w2",  "link 2 rate",         "m/s²/(rad/s)",  10.2348,  -50.0,  50.0, step=0.1),
-        ParamSpec("tau_v", "cart velocity blend", "s",                0.10,    0.0,   2.0, step=0.01),
+        ParamSpec("k_x",   "cart position",       "1/s²",           0.6196,  -50.0,  50.0, step=0.1),
+        ParamSpec("k_th1", "link 1 angle",        "m/s²/rad",    -104.6876, -500.0, 500.0, step=1.0),
+        ParamSpec("k_th2", "link 2 angle",        "m/s²/rad",     111.8694, -500.0, 500.0, step=1.0),
+        ParamSpec("k_dx",  "cart velocity",       "1/s",            1.5906,  -50.0,  50.0, step=0.1),
+        ParamSpec("k_w1",  "link 1 rate",         "m/s²/(rad/s)",  -3.6197,  -50.0,  50.0, step=0.1),
+        ParamSpec("k_w2",  "link 2 rate",         "m/s²/(rad/s)",   9.8304,  -50.0,  50.0, step=0.1),
+        ParamSpec("tau_v", "cart velocity blend", "s",              0.10,     0.0,   2.0, step=0.01),
     )
 
     __slots__ = ("p", "k_x", "k_th1", "k_th2", "k_dx", "k_w1", "k_w2",
