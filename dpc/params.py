@@ -74,9 +74,13 @@ class Nominal:
     g: float = 9.81
     """m/s^2. Known, so it carries no correction factor."""
 
-    rail_len: float = 0.50
+    rail_len: float = 1.00
     """m. Total cart travel between the end stops, measured, so no
-    correction factor. A constraint on the state, not a term in the
+    correction factor. A metre rather than the half-metre first specced:
+    balancing never needs more than a few centimetres, but swing-up pumps
+    energy by running the cart, and the excursions that takes are on the
+    order of l1 + l2. Rail is the one dimension that cannot be changed
+    after the machine is built. A constraint on the state, not a term in the
     equations of motion: it must never enter EFFECTIVE_NAMES or
     effective()."""
 

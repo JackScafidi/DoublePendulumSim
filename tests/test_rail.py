@@ -32,10 +32,10 @@ HANGING = np.array([0.0, np.pi, np.pi, 0.0, 0.0, 0.0])
 # Where the wall is.
 # --------------------------------------------------------------------------
 
-def test_the_rail_is_half_a_metre_of_travel():
+def test_the_rail_is_a_metre_of_travel():
     p = Params()
-    assert p.nominal.rail_len == pytest.approx(0.50)
-    assert p.x_lim == pytest.approx(0.25)
+    assert p.nominal.rail_len == pytest.approx(1.00)
+    assert p.x_lim == pytest.approx(0.50)
 
 
 def test_the_rail_is_not_a_term_in_the_equations_of_motion():
@@ -123,7 +123,7 @@ def test_a_constant_push_parks_the_cart_on_the_stop(a):
     """Drive hard enough for long enough and the cart arrives at the stop,
     stops dead, and stays there for the rest of the run."""
     p = Params()
-    r = run(M, HANGING, ConstantController(a), p, t_end=1.0, ts=TS,
+    r = run(M, HANGING, ConstantController(a), p, t_end=2.0, ts=TS,
             substeps=2)
     x, xdot = r.s[:, 0], r.s[:, 3]
 
@@ -137,7 +137,7 @@ def test_a_constant_push_parks_the_cart_on_the_stop(a):
 
 
 def test_the_run_records_the_ticks_spent_against_a_stop():
-    r = run(M, HANGING, ConstantController(2.0), P, t_end=1.0, ts=TS,
+    r = run(M, HANGING, ConstantController(2.0), P, t_end=2.0, ts=TS,
             substeps=2)
     assert r.pinned.shape == r.slipped.shape
     assert r.pinned.dtype == bool
@@ -194,7 +194,7 @@ def test_the_generator_delivers_nothing_into_a_wall():
     """Pinned, the firmware is clamping its own motion at the stop, so nothing
     at all leaves the step generator. A residual acceleration here would be
     integrated by the plant and kick the links on every substep."""
-    r = run(M, HANGING, ConstantController(2.0), P, t_end=1.0, ts=TS,
+    r = run(M, HANGING, ConstantController(2.0), P, t_end=2.0, ts=TS,
             substeps=2)
     assert r.pinned.any()
     assert np.all(r.a_del[r.pinned] == 0.0)
@@ -222,7 +222,7 @@ def test_the_links_see_a_fixed_pivot_while_the_counter_is_pinned():
     cart, so across a pinned stretch the links must evolve exactly as they
     would about a pivot nailed to the stop. The only impulse they ever feel is
     the one real contact."""
-    r = run(M, HANGING, ConstantController(2.0), P, t_end=1.0, ts=TS,
+    r = run(M, HANGING, ConstantController(2.0), P, t_end=2.0, ts=TS,
             substeps=2)
 
     i1 = len(r.t) - 1
@@ -274,7 +274,7 @@ def test_the_live_source_sees_the_same_wall():
     playback but not in a batch run would be two different plants."""
     src = SimSource(M, P, substeps=2)
     src.start(ConstantController(2.0), by_key("hanging"))
-    samples = src.poll(1.0)
+    samples = src.poll(2.0)
 
     x = np.array([s.truth[0] for s in samples if s.truth is not None])
     assert np.max(np.abs(x)) == pytest.approx(P.x_lim, abs=1e-12)
