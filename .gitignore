@@ -36,3 +36,6 @@ dpc/.derivation_cache/
 
 # Seeded design-canvas output (regenerate with the design skill)
 docs/design/pendulum-dashboard.html
+
+# Local tool config -- not tracked
+.claude/
